@@ -73,6 +73,24 @@
   .chip.off { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
   .jname { color: var(--ink); }
   .empty { color: var(--muted); text-align: center; padding: 24px; }
+  header nav { margin-left: auto; display: flex; gap: 16px; font-size: 15px; }
+  header nav a { color: var(--ink); text-decoration: none; font-weight: 600; }
+  header nav a:hover { color: var(--brand); }
+  .access { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 0 0 18px; font-size: 14px; color: var(--muted); }
+  .access.ok { border-color: color-mix(in srgb, var(--ok) 35%, var(--line)); }
+  .access.warn { border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); background: var(--warn-bg); }
+  .access b { color: var(--ink); }
+  .access-line { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+  .access-text { flex: 1 1 320px; }
+  .access-acts { display: inline-flex; flex-wrap: wrap; gap: 14px; }
+  .access-code { font: 600 13px/1 ui-monospace, Menlo, Consolas, monospace; color: var(--brand); letter-spacing: .5px; }
+  .access-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .access-form input { font: 600 15px/1.2 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .5px; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-width: 0; flex: 1 1 220px; text-transform: uppercase; }
+  .access-form input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  button.small { padding: 8px 14px; font-size: 14px; }
+  .access-msg { color: var(--bad); margin-top: 6px; }
+  .linkbtn.strong { font-weight: 700; }
+  .error a { color: inherit; font-weight: 600; }
   .tabs { display: flex; gap: 6px; margin: 0 0 16px; border-bottom: 1px solid var(--line); }
   .tab { border: none; background: none; border-radius: 0; padding: 10px 14px; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .tab[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--brand); }
@@ -111,8 +129,11 @@
   <header>
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <h1>Rujuk</h1>
+    <nav><a href="/harga">Harga</a></nav>
   </header>
   <p class="tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, DOI-nya tepat, dan cocok dengan sitasi di naskah.</p>
+
+  <div class="access" id="access" aria-live="polite"></div>
 
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-cek" aria-selected="true" aria-controls="pane-cek">Cek Referensi</button>
@@ -196,6 +217,7 @@ Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pust
 
 <script src="/citecheck.js"></script>
 <script src="/docx.js"></script>
+<script src="/access.js"></script>
 <script>
 (() => {
   const MAX_REFS = 500;
@@ -268,21 +290,34 @@ Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pust
     $('out').hidden = false; render();
 
     try {
-      for (let i = 0; i < refs.length; i += BATCH) {
-        const chunk = refs.slice(i, i + BATCH);
+      for (let i = 0; i < refs.length;) {
+        const chunk = refs.slice(i, i + RujukAccess.batchSize(BATCH));
         const res = await fetch('/api/check', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...RujukAccess.headers() },
           body: JSON.stringify({ references: chunk }),
         });
         const data = await res.json().catch(() => ({}));
+        if (data.access) RujukAccess.update(data.access);
+        if (res.status === 402) {
+          const e = new Error(data.error || 'Kuota tidak cukup.');
+          e.quota = true;
+          throw e;
+        }
         if (!res.ok) throw new Error(data.error || 'Server tidak merespons dengan benar.');
         results.push(...data.results);
+        i += chunk.length;
         barFill.style.width = Math.round((results.length / refs.length) * 100) + '%';
         render();
       }
     } catch (e) {
-      errEl.textContent = e.message + (results.length ? ` (${results.length} dari ${refs.length} sudah diperiksa)` : '');
+      errEl.replaceChildren(e.message + (results.length ? ` (${results.length} dari ${refs.length} sudah diperiksa.)` : ''));
+      if (e.quota) {
+        const a = document.createElement('a');
+        a.href = '/harga';
+        a.textContent = 'Lihat paket dan harga';
+        errEl.append(' ', a);
+      }
     } finally {
       go.disabled = false; go.textContent = 'Periksa';
       setTimeout(() => { bar.style.display = 'none'; }, 600);
@@ -394,6 +429,9 @@ Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pust
     URL.revokeObjectURL(a.href);
   };
 })();
+</script>
+<script>
+RujukAccess.init(document.getElementById('access'));
 </script>
 <script>
 (() => {

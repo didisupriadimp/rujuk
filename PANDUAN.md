@@ -12,11 +12,17 @@ Panduan ini tidak memerlukan pengetahuan Git atau pemrograman. Perkiraan waktu: 
 | `public/index.html` | Tampilan halaman yang dilihat pengguna |
 | `public/citecheck.js` | Logika pencocokan sitasi dengan daftar pustaka |
 | `public/docx.js` | Pembaca file Word (.docx) di browser |
+| `public/access.js` | Kode akses, kuota, dan percobaan gratis di tampilan |
+| `public/harga.html` | Halaman Harga (`/harga`) |
+| `public/admin.html` | Halaman admin (`/admin`) |
+| `lib/store.js`, `lib/access.js`, `lib/lynk.js`, `lib/mailer.js` | Database kode akses, paket, webhook Lynk, email |
+| `config/paket.json` | Harga, kuota, masa berlaku, dan link Lynk tiap paket |
+| `PANDUAN-JUALAN.md` | Langkah menyiapkan penjualan (database, email, Lynk, admin) |
 | `package.json` | Identitas aplikasi untuk Node.js |
 | `render.yaml` | Pengaturan otomatis untuk Render |
 | `.env.example` | Contoh pengaturan (tidak wajib diunggah) |
 
-Aplikasi ini tidak memakai pustaka tambahan, jadi tidak ada folder `node_modules` yang perlu diunggah.
+Aplikasi hanya memakai satu pustaka tambahan (`pg`, untuk database) yang dipasang otomatis oleh Render lewat `npm install`. Jangan unggah folder `node_modules` ke GitHub.
 
 ---
 

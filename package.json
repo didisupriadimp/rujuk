@@ -1,6 +1,6 @@
 {
   "name": "rujuk",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "description": "Pemeriksa daftar pustaka: cek keberadaan referensi dan DOI lewat Crossref dan OpenAlex",
   "main": "server.js",
   "scripts": {
@@ -10,5 +10,8 @@
     "node": ">=18"
   },
   "license": "UNLICENSED",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "pg": "^8.13.0"
+  }
 }

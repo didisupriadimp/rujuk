@@ -1,0 +1,41 @@
+{
+  "_catatan": "Ubah harga, kuota, masa berlaku, dan link Lynk di file ini. 'cocok' = kata di judul produk Lynk yang menandai paket ini (huruf besar/kecil tidak berpengaruh).",
+  "percobaan_gratis_per_hari": 10,
+  "kontak_wa": "",
+  "paket": [
+    {
+      "id": "skripsi",
+      "nama": "Paket Skripsi",
+      "untuk": "Mahasiswa S1",
+      "harga": 35000,
+      "kuota": 150,
+      "hari": 30,
+      "link_lynk": "",
+      "cocok": ["skripsi"],
+      "fitur": ["Cek hingga 150 referensi", "Berlaku 30 hari sejak pertama dipakai", "Laporan CSV & salin laporan"]
+    },
+    {
+      "id": "tesis",
+      "nama": "Paket Tesis & Disertasi",
+      "untuk": "Mahasiswa S2 & S3",
+      "harga": 75000,
+      "kuota": 500,
+      "hari": 60,
+      "link_lynk": "",
+      "cocok": ["tesis", "disertasi"],
+      "unggulan": true,
+      "fitur": ["Cek hingga 500 referensi", "Berlaku 60 hari sejak pertama dipakai", "Cukup untuk beberapa kali revisi"]
+    },
+    {
+      "id": "jurnal",
+      "nama": "Paket Pengelola Jurnal",
+      "untuk": "Editor, reviewer, dosen pembimbing",
+      "harga": 150000,
+      "kuota": 2000,
+      "hari": 30,
+      "link_lynk": "",
+      "cocok": ["jurnal", "editor", "dosen"],
+      "fitur": ["Cek hingga 2.000 referensi", "Berlaku 30 hari sejak pertama dipakai", "Untuk memeriksa banyak naskah"]
+    }
+  ]
+}

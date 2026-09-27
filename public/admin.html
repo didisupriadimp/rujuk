@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Admin — Rujuk</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --panel: #ffffff; --ink: #1d2320; --muted: #5d6762; --line: #e3dfd6;
+    --brand: #1f5c4a; --brand-ink: #ffffff; --brand-soft: #e4efe9;
+    --ok: #1d7a4f; --ok-bg: #e3f3ea; --warn: #9a6200; --warn-bg: #fcf1dc; --bad: #b3261e; --bad-bg: #fbe5e3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151917; --panel: #1d2320; --ink: #e8ece9; --muted: #9aa6a0; --line: #2e3632;
+      --brand: #5fbf9a; --brand-ink: #0f1a15; --brand-soft: #22332b;
+      --ok: #6fd3a0; --ok-bg: #1d3328; --warn: #f0b95a; --warn-bg: #3a2f1a; --bad: #f28b82; --bad-bg: #3d2220;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 16px; }
+  h2 { font-size: 17px; margin: 28px 0 10px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  input, select, textarea { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-width: 0; }
+  button { font: inherit; border-radius: 8px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  button.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); font-weight: 600; }
+  button.mini { padding: 3px 8px; font-size: 13px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .grid label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .card b { display: block; font-size: 18px; }
+  .card span { color: var(--muted); font-size: 13px; }
+  .good { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+  .notice { background: var(--warn-bg); color: var(--warn); border-radius: 10px; padding: 10px 14px; margin-top: 10px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+  .pill { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .p-aktif { background: var(--ok-bg); color: var(--ok); }
+  .p-habis, .p-kedaluwarsa { background: var(--warn-bg); color: var(--warn); }
+  .p-nonaktif { background: var(--bad-bg); color: var(--bad); }
+  .muted { color: var(--muted); font-size: 13px; }
+  .acts { display: flex; flex-wrap: wrap; gap: 4px; }
+  .acts a { font-size: 13px; color: var(--brand); }
+  .result { margin-top: 12px; }
+  .result a { color: var(--brand); }
+  .result .code { font: 700 20px/1.2 ui-monospace, Menlo, Consolas, monospace; color: var(--brand); }
+  pre { white-space: pre-wrap; word-break: break-all; background: var(--bg); padding: 10px; border-radius: 8px; font-size: 12px; max-height: 320px; overflow: auto; }
+  details summary { cursor: pointer; }
+  .log { border-bottom: 1px solid var(--line); padding: 10px 0; }
+  .log:last-child { border-bottom: none; }
+  #err { color: var(--bad); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="row" style="justify-content:space-between"><h1>Admin Rujuk</h1><button id="logout" hidden>Keluar</button></div>
+
+  <section id="login" class="panel">
+    <form id="loginform" class="row">
+      <input id="token" type="password" placeholder="ADMIN_TOKEN" autocomplete="current-password" style="flex:1 1 280px">
+      <button class="primary" type="submit">Masuk</button>
+    </form>
+    <div id="err" role="alert"></div>
+  </section>
+
+  <main id="app" hidden>
+    <div class="cards" id="cards"></div>
+    <div id="notices"></div>
+
+    <h2>Buat kode manual</h2>
+    <form id="create" class="panel">
+      <div class="grid">
+        <label>Paket<select id="c-plan"></select></label>
+        <label>Email pembeli<input id="c-email" type="email" placeholder="opsional"></label>
+        <label>Nama<input id="c-name" placeholder="opsional"></label>
+        <label>No. WhatsApp<input id="c-phone" placeholder="opsional"></label>
+        <label>Kuota (kosong = sesuai paket)<input id="c-quota" type="number" min="1"></label>
+        <label>Hari berlaku (kosong = sesuai paket)<input id="c-days" type="number" min="1"></label>
+        <label>Catatan<input id="c-note" placeholder="mis. transfer manual, institusi"></label>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <label class="row" style="gap:6px"><input id="c-send" type="checkbox" checked> Kirim email ke pembeli</label>
+        <button class="primary" type="submit">Buat kode</button>
+      </div>
+      <div class="result" id="c-result"></div>
+    </form>
+
+    <h2>Kode akses</h2>
+    <form id="searchform" class="row" style="margin-bottom:10px">
+      <input id="q" placeholder="Cari kode, email, nama, WA, nomor transaksi" style="flex:1 1 320px">
+      <button type="submit">Cari</button>
+    </form>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Kode</th><th>Paket</th><th>Pembeli</th><th>Kuota</th><th>Status</th><th>Berlaku</th><th>Sumber</th><th>Aksi</th></tr></thead>
+      <tbody id="codes"></tbody>
+    </table></div>
+
+    <h2>Log webhook Lynk <button class="mini" id="reloadlogs">Muat ulang</button></h2>
+    <div class="panel" id="logs"></div>
+  </main>
+</div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const fmt = (iso) => iso ? new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Jakarta' }) : '—';
+  let token = '';
+  try { token = sessionStorage.getItem('rujuk_admin') || ''; } catch { /* abaikan */ }
+
+  async function api(method, path, body) {
+    const r = await fetch('/api/admin' + path, {
+      method, headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const d = await r.json().catch(() => ({}));
+    if (r.status === 401) { logout(d.error); throw new Error(d.error); }
+    if (!r.ok) throw new Error(d.error || 'Gagal.');
+    return d;
+  }
+
+  function logout(msg) {
+    token = '';
+    try { sessionStorage.removeItem('rujuk_admin'); } catch { /* abaikan */ }
+    $('app').hidden = true; $('login').hidden = false; $('logout').hidden = true;
+    $('err').textContent = msg || '';
+  }
+  $('logout').onclick = () => logout();
+
+  $('loginform').onsubmit = async (e) => {
+    e.preventDefault();
+    token = $('token').value.trim();
+    try { await start(); try { sessionStorage.setItem('rujuk_admin', token); } catch { /* abaikan */ } } catch { /* pesan sudah tampil */ }
+  };
+
+  function card(value, label, cls) {
+    const c = el('div', 'card');
+    const b = el('b', cls || null, value);
+    c.append(b, el('span', null, label));
+    return c;
+  }
+
+  async function start() {
+    const s = await api('GET', '/summary');
+    $('login').hidden = true; $('app').hidden = false; $('logout').hidden = false; $('err').textContent = '';
+    $('cards').replaceChildren(
+      card(String(s.stats.codes), 'Total kode'),
+      card(String(s.stats.active), 'Kode aktif'),
+      card(s.store === 'postgres' ? 'PostgreSQL' : 'File lokal', 'Penyimpanan', s.store === 'postgres' ? 'good' : 'bad'),
+      card(s.email ? 'Aktif' : 'Belum diatur', 'Email otomatis', s.email ? 'good' : 'warn'),
+      card(s.webhook ? 'Aktif' : 'Belum diatur', 'Webhook Lynk', s.webhook ? 'good' : 'warn'),
+    );
+    const n = $('notices');
+    n.replaceChildren();
+    if (s.store !== 'postgres') n.append(el('div', 'notice', 'Penyimpanan masih file lokal: semua kode HILANG setiap Render memasang ulang aplikasi. Isi DATABASE_URL sebelum mulai berjualan.'));
+    if (!s.email) n.append(el('div', 'notice', 'Email otomatis belum aktif (RESEND_API_KEY / EMAIL_FROM). Kode tetap dibuat; kirim manual lewat tombol WA atau salin kodenya.'));
+    if (s.webhook) n.append(el('div', 'muted', `URL webhook untuk Lynk: ${location.origin}/api/lynk/webhook/<LYNK_WEBHOOK_SECRET>`));
+    $('c-plan').replaceChildren(...s.plans.map((p) => { const o = el('option', null, `${p.nama} (${p.kuota} ref, ${p.hari} hari)`); o.value = p.id; return o; }));
+    await Promise.all([loadCodes(), loadLogs()]);
+  }
+
+  async function loadCodes() {
+    const d = await api('GET', '/codes?q=' + encodeURIComponent($('q').value.trim()));
+    const tb = $('codes');
+    tb.replaceChildren();
+    if (!d.codes.length) { const tr = el('tr'); const td = el('td', 'muted', 'Belum ada kode.'); td.colSpan = 8; tr.append(td); tb.append(tr); return; }
+    for (const c of d.codes) tb.append(row(c));
+  }
+
+  function row(c) {
+    const v = c.view;
+    const tr = el('tr');
+    const tdCode = el('td');
+    tdCode.append(el('div', 'mono', c.code), el('div', 'muted', fmt(c.created_at)));
+    const buyer = el('td');
+    buyer.append(el('div', null, c.name || '—'), el('div', 'muted', c.email || ''), el('div', 'muted', c.phone || ''));
+    if (c.note) buyer.append(el('div', 'muted', 'Catatan: ' + c.note));
+    const quota = el('td', null, `${v.remaining} / ${c.quota_total}`);
+    const st = el('td');
+    st.append(el('span', 'pill p-' + v.status, v.status));
+    if (c.email) st.append(el('div', 'muted', c.email_sent ? 'email terkirim' : 'email belum terkirim'));
+    const exp = el('td', 'muted', c.expires_at ? 's.d. ' + fmt(c.expires_at) : `${c.days} hari sejak dipakai`);
+    const src = el('td', 'muted', (c.source || '') + (c.order_ref ? '\n' + c.order_ref : ''));
+    src.style.whiteSpace = 'pre-line';
+    const acts = el('td');
+    const box = el('div', 'acts');
+    const btn = (label, fn) => { const b = el('button', 'mini', label); b.type = 'button'; b.onclick = fn; return b; };
+    const act = async (body) => {
+      try {
+        const r = await api('POST', '/codes/' + c.code, body);
+        if (r.mail && !r.mail.sent) alert('Email tidak terkirim: ' + r.mail.reason);
+        tr.replaceWith(row(r.code));
+      } catch (e) { alert(e.message); }
+    };
+    box.append(
+      btn('+ kuota', () => { const n = Number(prompt('Tambah berapa kuota?', '50')); if (n) act({ action: 'add_quota', amount: n }); }),
+      btn('+ hari', () => { const n = Number(prompt('Perpanjang berapa hari?', '7')); if (n) act({ action: 'extend', amount: n }); }),
+      c.disabled ? btn('Aktifkan', () => act({ action: 'enable' })) : btn('Nonaktifkan', () => { if (confirm('Nonaktifkan kode ' + c.code + '?')) act({ action: 'disable' }); }),
+      btn('Kirim email', () => { const em = prompt('Kirim ke email:', c.email || ''); if (em) act({ action: 'resend', email: em }); }),
+      btn('Salin', () => navigator.clipboard.writeText(c.code).catch(() => {})),
+    );
+    if (c.wa) { const a = el('a', null, 'Kirim WA'); a.href = c.wa; a.target = '_blank'; a.rel = 'noopener'; box.append(a); }
+    acts.append(box);
+    const plan = el('td', null, c.plan_name || c.plan);
+    tr.append(tdCode, plan, buyer, quota, st, exp, src, acts);
+    return tr;
+  }
+
+  async function loadLogs() {
+    const d = await api('GET', '/logs');
+    const box = $('logs');
+    box.replaceChildren();
+    if (!d.logs.length) { box.append(el('div', 'muted', 'Belum ada webhook masuk. Gunakan tombol "Test" di pengaturan webhook Lynk untuk mencoba.')); return; }
+    for (const l of d.logs) {
+      const item = el('div', 'log');
+      item.append(el('div', 'muted', fmt(l.received_at)), el('div', null, l.result || ''));
+      const det = el('details');
+      det.append(el('summary', 'muted', 'Lihat isi webhook'));
+      let body = l.body || '';
+      try { body = JSON.stringify(JSON.parse(body), null, 2); } catch { /* bukan JSON */ }
+      det.append(el('pre', null, body));
+      item.append(det);
+      box.append(item);
+    }
+  }
+
+  $('searchform').onsubmit = (e) => { e.preventDefault(); loadCodes().catch((x) => alert(x.message)); };
+  $('reloadlogs').onclick = () => loadLogs().catch((x) => alert(x.message));
+
+  $('create').onsubmit = async (e) => {
+    e.preventDefault();
+    const out = $('c-result');
+    out.replaceChildren();
+    try {
+      const r = await api('POST', '/codes', {
+        plan: $('c-plan').value, email: $('c-email').value, name: $('c-name').value, phone: $('c-phone').value,
+        quota: $('c-quota').value, days: $('c-days').value, note: $('c-note').value, send_email: $('c-send').checked && !!$('c-email').value,
+      });
+      out.append(el('div', 'code', r.code.code));
+      out.append(el('div', 'muted', `${r.code.quota_total} referensi, ${r.code.days} hari. Email: ${r.mail.sent ? 'terkirim' : r.mail.reason}.`));
+      if (r.code.wa) { const a = el('a', null, 'Kirim lewat WhatsApp'); a.href = r.code.wa; a.target = '_blank'; a.rel = 'noopener'; out.append(a); }
+      ['c-email', 'c-name', 'c-phone', 'c-quota', 'c-days', 'c-note'].forEach((id) => { $(id).value = ''; });
+      loadCodes();
+    } catch (x) { out.append(el('div', 'bad', x.message)); }
+  };
+
+  if (token) start().catch(() => {});
+})();
+</script>
+</body>
+</html>
