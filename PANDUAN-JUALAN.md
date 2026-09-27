@@ -40,12 +40,13 @@ Bila langkah ini belum selesai, Rujuk tetap membuat kode, tetapi Anda perlu meng
 
 ## Langkah 3 — Buat produk di Lynk.id
 
-Buat satu produk digital untuk setiap paket. **Judul produk harus memuat kata kunci paket**, karena dari situlah server tahu paket mana yang dibeli:
+Buat satu produk digital untuk setiap paket (empat produk: Skripsi, Tesis, Disertasi, Pengelola Jurnal). **Judul produk harus memuat kata kunci paket**, karena dari situlah server tahu paket mana yang dibeli:
 
 | Paket | Kata yang harus ada di judul produk Lynk | Contoh judul |
 |---|---|---|
 | Paket Skripsi | `skripsi` | Rujuk — Paket Skripsi (150 referensi) |
-| Paket Tesis & Disertasi | `tesis` atau `disertasi` | Rujuk — Paket Tesis & Disertasi |
+| Paket Tesis | `tesis` | Rujuk — Paket Tesis (300 referensi) |
+| Paket Disertasi | `disertasi` | Rujuk — Paket Disertasi (500 referensi) |
 | Paket Pengelola Jurnal | `jurnal`, `editor`, atau `dosen` | Rujuk — Paket Pengelola Jurnal |
 
 Isi deskripsi produk, misalnya:

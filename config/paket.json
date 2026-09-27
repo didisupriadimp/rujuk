@@ -11,20 +11,49 @@
       "kuota": 150,
       "hari": 30,
       "link_lynk": "",
-      "cocok": ["skripsi"],
-      "fitur": ["Cek hingga 150 referensi", "Berlaku 30 hari sejak pertama dipakai", "Laporan CSV & salin laporan"]
+      "cocok": [
+        "skripsi"
+      ],
+      "fitur": [
+        "Cek hingga 150 referensi",
+        "Berlaku 30 hari sejak pertama dipakai",
+        "Laporan CSV & salin laporan"
+      ]
     },
     {
       "id": "tesis",
-      "nama": "Paket Tesis & Disertasi",
-      "untuk": "Mahasiswa S2 & S3",
-      "harga": 75000,
-      "kuota": 500,
-      "hari": 60,
+      "nama": "Paket Tesis",
+      "untuk": "Mahasiswa S2",
+      "harga": 65000,
+      "kuota": 300,
+      "hari": 30,
       "link_lynk": "",
-      "cocok": ["tesis", "disertasi"],
+      "cocok": [
+        "tesis"
+      ],
       "unggulan": true,
-      "fitur": ["Cek hingga 500 referensi", "Berlaku 60 hari sejak pertama dipakai", "Cukup untuk beberapa kali revisi"]
+      "fitur": [
+        "Cek hingga 300 referensi",
+        "Berlaku 30 hari sejak pertama dipakai",
+        "Cukup untuk beberapa kali revisi"
+      ]
+    },
+    {
+      "id": "disertasi",
+      "nama": "Paket Disertasi",
+      "untuk": "Mahasiswa S3",
+      "harga": 95000,
+      "kuota": 500,
+      "hari": 30,
+      "link_lynk": "",
+      "cocok": [
+        "disertasi"
+      ],
+      "fitur": [
+        "Cek hingga 500 referensi",
+        "Berlaku 30 hari sejak pertama dipakai",
+        "Untuk daftar pustaka yang panjang"
+      ]
     },
     {
       "id": "jurnal",
@@ -34,8 +63,16 @@
       "kuota": 2000,
       "hari": 30,
       "link_lynk": "",
-      "cocok": ["jurnal", "editor", "dosen"],
-      "fitur": ["Cek hingga 2.000 referensi", "Berlaku 30 hari sejak pertama dipakai", "Untuk memeriksa banyak naskah"]
+      "cocok": [
+        "jurnal",
+        "editor",
+        "dosen"
+      ],
+      "fitur": [
+        "Cek hingga 2.000 referensi",
+        "Berlaku 30 hari sejak pertama dipakai",
+        "Untuk memeriksa banyak naskah"
+      ]
     }
   ]
 }
