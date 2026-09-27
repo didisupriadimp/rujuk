@@ -59,7 +59,7 @@
   .badge { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
   .b-valid { color: var(--ok); background: var(--ok-bg); }
   .b-periksa { color: var(--warn); background: var(--warn-bg); }
-  .b-doi_salah, .b-doi_tidak_ada, .b-tidak_ditemukan { color: var(--bad); background: var(--bad-bg); }
+  .b-doi_salah, .b-doi_tidak_ada, .b-isbn_salah, .b-tidak_ditemukan { color: var(--bad); background: var(--bad-bg); }
   .b-galat { color: var(--gray); background: var(--gray-bg); }
   .detail { margin: 10px 0 0 34px; font-size: 14px; color: var(--muted); }
   .detail .found { color: var(--ink); }
@@ -95,7 +95,7 @@
     <textarea id="input" spellcheck="false" placeholder="Contoh:
 Sugiyono. (2019). Metode penelitian kuantitatif, kualitatif, dan R&amp;D. Alfabeta.
 Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; of goal pursuits: Human needs and the self-determination of behavior. Psychological Inquiry, 11(4), 227–268. https://doi.org/10.1207/S15327965PLI1104_01"></textarea>
-    <p class="hint">Satu referensi per baris (atau pisahkan dengan baris kosong). Mendukung gaya APA, IEEE, Harvard, dan penomoran [1] atau 1.</p>
+    <p class="hint">Satu referensi per baris (atau pisahkan dengan baris kosong). Mendukung gaya APA, IEEE, Harvard, dan penomoran [1] atau 1. Buku dicek lewat judul, penulis, dan ISBN.</p>
     <div class="row">
       <button class="primary" id="go">Periksa</button>
       <button id="clear">Kosongkan</button>
@@ -115,7 +115,7 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
   </section>
 
   <footer>
-    Data dicocokkan dengan Crossref, OpenAlex, PubMed, dan DOAJ.<span id="sjrinfo"></span> "Tidak ditemukan" tidak otomatis berarti fiktif: buku, prosiding, dan sebagian jurnal nasional belum tentu terindeks, jadi tetap periksa manual.
+    Data dicocokkan dengan Crossref, OpenAlex, PubMed, DOAJ, Google Books, dan Open Library.<span id="sjrinfo"></span> "Tidak ditemukan" tidak otomatis berarti fiktif: buku, prosiding, dan sebagian jurnal nasional belum tentu terindeks, jadi tetap periksa manual.
   </footer>
 </div>
 
@@ -139,7 +139,7 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
   const GROUPS = [
     { key: 'valid', label: 'Ditemukan', match: (r) => r.status === 'valid' },
     { key: 'periksa', label: 'Perlu dicek', match: (r) => r.status === 'periksa' },
-    { key: 'masalah', label: 'Bermasalah', match: (r) => ['doi_salah', 'doi_tidak_ada', 'tidak_ditemukan'].includes(r.status) },
+    { key: 'masalah', label: 'Bermasalah', match: (r) => ['doi_salah', 'doi_tidak_ada', 'isbn_salah', 'tidak_ditemukan'].includes(r.status) },
     { key: 'scopus', label: 'Di jurnal Scopus', match: (r) => !!(r.journal && r.journal.scopus), optional: true },
     { key: 'galat', label: 'Gagal diperiksa', match: (r) => r.status === 'galat', optional: true },
   ];
@@ -243,7 +243,7 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
         const t = r.match.url ? el('a', null, r.match.title) : el('span', null, r.match.title);
         if (r.match.url) { t.href = r.match.url; t.target = '_blank'; t.rel = 'noopener'; }
         f.append(t);
-        const meta = [r.match.authors && r.match.authors.slice(0, 3).join(', ') + (r.match.authors.length > 3 ? ' dkk.' : ''), r.match.year, r.match.venue]
+        const meta = [r.match.authors && r.match.authors.slice(0, 3).join(', ') + (r.match.authors.length > 3 ? ' dkk.' : ''), r.match.year, r.match.venue, r.match.isbn && 'ISBN ' + r.match.isbn]
           .filter(Boolean).join(' · ');
         if (meta) f.append(el('div', null, meta + ` (${r.match.source})`));
         d.append(f);

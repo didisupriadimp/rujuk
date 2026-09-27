@@ -115,8 +115,13 @@ Setiap referensi melalui langkah berikut:
 
 1. **Ada DOI?** Dicek berurutan ke Crossref, OpenAlex, PubMed, dan DOAJ. Judul dari DOI dibandingkan dengan judul yang Anda tulis.
 2. **DOI tidak ditemukan?** Dicek ke doi.org apakah DOI itu terdaftar sama sekali.
-3. **Tanpa DOI?** Dicari dulu di Crossref dan OpenAlex. Bila belum ada yang cocok, pencarian dilanjutkan ke PubMed (kesehatan/kedokteran) dan DOAJ (jurnal open access, termasuk banyak jurnal Indonesia). Lalu dinilai kemiripan judul, tahun, dan nama penulis.
-4. **Indeks jurnal.** Nama jurnal atau ISSN dicocokkan dengan data SJR untuk menampilkan label Scopus Q1–Q4.
+3. **Ada ISBN (buku)?** Angka pemeriksa ISBN dicek dulu (untuk mendeteksi salah ketik), lalu ISBN dicari di Google Books dan Open Library dan judulnya dibandingkan.
+4. **Tanpa DOI/ISBN?** Dicari dulu di Crossref dan OpenAlex. Bila belum ada yang cocok, pencarian dilanjutkan sesuai jenis referensi:
+   - **Artikel** (ada nama jurnal, volume, nomor, atau halaman): PubMed (kesehatan/kedokteran) dan DOAJ (jurnal open access, termasuk banyak jurnal Indonesia).
+   - **Buku** (tanpa ciri artikel): Google Books dan Open Library, berdasarkan judul dan nama penulis pertama.
+
+   Setelah itu dinilai kemiripan judul, tahun, dan nama penulis. Untuk buku, tahun yang berbeda tidak dianggap salah karena bisa jadi edisi atau cetakan lain; aplikasi hanya memberi catatan.
+5. **Indeks jurnal.** Nama jurnal atau ISSN dicocokkan dengan data SJR untuk menampilkan label Scopus Q1–Q4.
 
 Arti status:
 
@@ -126,6 +131,7 @@ Arti status:
 | **Perlu dicek** | Ada karya yang mirip, tetapi judul hanya cocok sebagian atau tahun/penulis berbeda. |
 | **DOI tidak cocok** | DOI terdaftar, tetapi menunjuk ke karya lain. Sering terjadi pada referensi buatan AI. |
 | **DOI tidak terdaftar** | DOI tidak ada di doi.org. |
+| **ISBN tidak cocok** | ISBN terdaftar, tetapi untuk buku lain. |
 | **Tidak ditemukan** | Tidak ada kecocokan. Belum tentu fiktif, karena buku, prosiding, dan sebagian jurnal nasional belum tentu terindeks. |
 | **Gagal diperiksa** | Layanan Crossref/OpenAlex sedang sibuk atau tidak dapat dihubungi. Coba lagi. |
 
@@ -138,6 +144,15 @@ Arti status:
 ## Pengaturan tambahan (opsional)
 
 - `NCBI_API_KEY`: API key gratis dari akun NCBI (ncbi.nlm.nih.gov → Account settings → API Key Management). Tanpa key, PubMed dibatasi 3 permintaan per detik. Dengan key, 10 per detik. Isi di Render lewat **Environment** → **Add Environment Variable**.
+
+- `GOOGLE_BOOKS_API_KEY`: **sangat disarankan.** Tanpa key, Google Books sering menolak permintaan dari server bersama seperti Render (kuota habis), sehingga pencarian buku hanya mengandalkan Open Library. Cara membuat key (gratis):
+  1. Buka [console.cloud.google.com](https://console.cloud.google.com) dan masuk dengan akun Google.
+  2. Buat project baru (misalnya "rujuk").
+  3. Menu **APIs & Services → Library**, cari **Books API**, klik **Enable**.
+  4. Menu **APIs & Services → Credentials → Create credentials → API key**. Salin key-nya.
+  5. Di Render: **Environment → Add Environment Variable**, Key `GOOGLE_BOOKS_API_KEY`, Value key tadi.
+
+Catatan pemakaian: Open Library meminta aplikasi mengirim identitas dan email (sudah otomatis bila `CONTACT_EMAIL` diisi) dan tidak dimaksudkan untuk layanan komersial bervolume besar. Google Books mewajibkan mengikuti Google APIs Terms of Service. Baca kedua ketentuan itu sebelum aplikasi dijual.
 
 ## Catatan paket Render
 
