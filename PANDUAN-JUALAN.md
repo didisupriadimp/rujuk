@@ -40,14 +40,15 @@ Bila langkah ini belum selesai, Rujuk tetap membuat kode, tetapi Anda perlu meng
 
 ## Langkah 3 — Buat produk di Lynk.id
 
-Buat satu produk digital untuk setiap paket (empat produk: Skripsi, Tesis, Disertasi, Pengelola Jurnal). **Judul produk harus memuat kata kunci paket**, karena dari situlah server tahu paket mana yang dibeli:
+Buat satu produk digital untuk setiap paket (tiga produk: Basic, Pro, Ultimate). **Judul produk harus memuat kata kunci paket**, karena dari situlah server tahu paket mana yang dibeli:
 
-| Paket | Kata yang harus ada di judul produk Lynk | Contoh judul |
-|---|---|---|
-| Paket Skripsi | `skripsi` | Rujuk — Paket Skripsi (150 referensi) |
-| Paket Tesis | `tesis` | Rujuk — Paket Tesis (300 referensi) |
-| Paket Disertasi | `disertasi` | Rujuk — Paket Disertasi (500 referensi) |
-| Paket Pengelola Jurnal | `jurnal`, `editor`, atau `dosen` | Rujuk — Paket Pengelola Jurnal |
+| Paket | Harga | Kuota / berlaku | Kata yang harus ada di judul produk Lynk | Link produk |
+|---|---|---|---|---|
+| Basic | Rp35.000 | 150 referensi / 30 hari | `Basic` | https://lynk.id/didisupriadimp/qj69wydo0k8d/checkout |
+| Pro | Rp65.000 | 300 referensi / 30 hari | `Pro` (sebagai kata tersendiri) | https://lynk.id/didisupriadimp/44le8p81pqnl/checkout |
+| Ultimate | Rp95.000 | 500 referensi / 30 hari | `Ultimate` | https://lynk.id/didisupriadimp/8oy1mdyv0oe1/checkout |
+
+Kata kunci dicocokkan sebagai kata utuh: judul "Rujuk Pro" cocok, tetapi "Rujuk Profesional" tidak. Kode produk di link Lynk (mis. `44le8p81pqnl`) juga dicocokkan otomatis bila ikut dikirim dalam webhook. Harga di Lynk harus sama dengan harga di `config/paket.json`.
 
 Isi deskripsi produk, misalnya:
 
@@ -102,7 +103,7 @@ Untuk jualan, ubah **Instance Type** ke paket berbayar (Settings → Instance Ty
 
 ## Langkah 7 — Uji pembelian sungguhan
 
-1. Buat produk tes sementara di Lynk dengan harga serendah mungkin dan judul yang memuat kata `skripsi` (mis. "Tes Skripsi").
+1. Buat produk tes sementara di Lynk dengan harga serendah mungkin dan judul yang memuat kata `Basic` (mis. "Tes Basic").
 2. Beli produk itu sendiri dengan email Anda.
 3. Periksa:
    - email berisi kode masuk;

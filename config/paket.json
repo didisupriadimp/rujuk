@@ -1,18 +1,18 @@
 {
-  "_catatan": "Ubah harga, kuota, masa berlaku, dan link Lynk di file ini. 'cocok' = kata di judul produk Lynk yang menandai paket ini (huruf besar/kecil tidak berpengaruh).",
+  "_catatan": "Ubah harga, kuota, masa berlaku, dan link Lynk di file ini. 'cocok' = kata utuh di judul produk Lynk yang menandai paket ini (huruf besar/kecil tidak berpengaruh). Kode produk di link Lynk juga dicocokkan otomatis.",
   "percobaan_gratis_per_hari": 10,
   "kontak_wa": "",
   "paket": [
     {
-      "id": "skripsi",
-      "nama": "Paket Skripsi",
-      "untuk": "Mahasiswa S1",
+      "id": "basic",
+      "nama": "Basic",
+      "untuk": "Skripsi (S1)",
       "harga": 35000,
       "kuota": 150,
       "hari": 30,
-      "link_lynk": "",
+      "link_lynk": "https://lynk.id/didisupriadimp/qj69wydo0k8d/checkout",
       "cocok": [
-        "skripsi"
+        "basic"
       ],
       "fitur": [
         "Cek hingga 150 referensi",
@@ -21,15 +21,15 @@
       ]
     },
     {
-      "id": "tesis",
-      "nama": "Paket Tesis",
-      "untuk": "Mahasiswa S2",
+      "id": "pro",
+      "nama": "Pro",
+      "untuk": "Tesis (S2)",
       "harga": 65000,
       "kuota": 300,
       "hari": 30,
-      "link_lynk": "",
+      "link_lynk": "https://lynk.id/didisupriadimp/44le8p81pqnl/checkout",
       "cocok": [
-        "tesis"
+        "pro"
       ],
       "unggulan": true,
       "fitur": [
@@ -39,39 +39,20 @@
       ]
     },
     {
-      "id": "disertasi",
-      "nama": "Paket Disertasi",
-      "untuk": "Mahasiswa S3",
+      "id": "ultimate",
+      "nama": "Ultimate",
+      "untuk": "Disertasi (S3) & pengelola jurnal",
       "harga": 95000,
       "kuota": 500,
       "hari": 30,
-      "link_lynk": "",
+      "link_lynk": "https://lynk.id/didisupriadimp/8oy1mdyv0oe1/checkout",
       "cocok": [
-        "disertasi"
+        "ultimate"
       ],
       "fitur": [
         "Cek hingga 500 referensi",
         "Berlaku 30 hari sejak pertama dipakai",
         "Untuk daftar pustaka yang panjang"
-      ]
-    },
-    {
-      "id": "jurnal",
-      "nama": "Paket Pengelola Jurnal",
-      "untuk": "Editor, reviewer, dosen pembimbing",
-      "harga": 150000,
-      "kuota": 2000,
-      "hari": 30,
-      "link_lynk": "",
-      "cocok": [
-        "jurnal",
-        "editor",
-        "dosen"
-      ],
-      "fitur": [
-        "Cek hingga 2.000 referensi",
-        "Berlaku 30 hari sejak pertama dipakai",
-        "Untuk memeriksa banyak naskah"
       ]
     }
   ]
