@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rujuk — Pemeriksa Daftar Pustaka</title>
+<meta name="description" content="Periksa apakah referensi di daftar pustaka benar-benar ada, DOI-nya benar, dan datanya cocok.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f5c4a'/%3E%3Cpath d='M10 16.5l4 4 8-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f6f4ef; --panel: #ffffff; --ink: #1d2320; --muted: #5d6762; --line: #e3dfd6;
+    --brand: #1f5c4a; --brand-ink: #ffffff; --brand-soft: #e4efe9;
+    --ok: #1d7a4f; --ok-bg: #e3f3ea; --warn: #9a6200; --warn-bg: #fcf1dc;
+    --bad: #b3261e; --bad-bg: #fbe5e3; --gray: #5f6b66; --gray-bg: #eceae4;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151917; --panel: #1d2320; --ink: #e8ece9; --muted: #9aa6a0; --line: #2e3632;
+      --brand: #5fbf9a; --brand-ink: #0f1a15; --brand-soft: #22332b;
+      --ok: #6fd3a0; --ok-bg: #1d3328; --warn: #f0b95a; --warn-bg: #3a2f1a;
+      --bad: #f28b82; --bad-bg: #3d2220; --gray: #a9b3ae; --gray-bg: #2a302d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 32px 16px 64px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .logo { width: 36px; height: 36px; border-radius: 9px; background: var(--brand); display: grid; place-items: center; }
+  .logo svg { width: 20px; height: 20px; }
+  h1 { font-size: 26px; margin: 0; letter-spacing: -0.01em; }
+  .tagline { color: var(--muted); margin: 4px 0 24px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  label.lead { font-weight: 600; display: block; margin-bottom: 8px; }
+  textarea { width: 100%; min-height: 220px; resize: vertical; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 14px/1.5 ui-monospace, Menlo, Consolas, monospace; }
+  textarea:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .hint { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+  button { font: inherit; border-radius: 10px; padding: 10px 18px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  button.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); font-weight: 600; }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  .count { color: var(--muted); font-size: 14px; margin-left: auto; }
+  .progress { height: 6px; border-radius: 6px; background: var(--gray-bg); overflow: hidden; margin-top: 16px; display: none; }
+  .progress > div { height: 100%; width: 0; background: var(--brand); transition: width .3s; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 24px 0 12px; }
+  .stat { border-radius: 10px; padding: 12px 14px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; text-align: left; }
+  .stat b { display: block; font-size: 24px; line-height: 1.1; }
+  .stat span { font-size: 13px; color: var(--muted); }
+  .stat.active { outline: 2px solid var(--brand); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
+  .toolbar button { padding: 7px 12px; font-size: 14px; }
+  ol.results { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .card-top { display: flex; gap: 10px; align-items: flex-start; }
+  .num { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 24px; }
+  .ref { flex: 1; word-break: break-word; }
+  .badge { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .b-valid { color: var(--ok); background: var(--ok-bg); }
+  .b-periksa { color: var(--warn); background: var(--warn-bg); }
+  .b-doi_salah, .b-doi_tidak_ada, .b-tidak_ditemukan { color: var(--bad); background: var(--bad-bg); }
+  .b-galat { color: var(--gray); background: var(--gray-bg); }
+  .detail { margin: 10px 0 0 34px; font-size: 14px; color: var(--muted); }
+  .detail .found { color: var(--ink); }
+  .detail ul { margin: 6px 0 0; padding-left: 18px; }
+  .detail a { color: var(--brand); }
+  .empty { color: var(--muted); text-align: center; padding: 24px; }
+  .error { color: var(--bad); margin-top: 12px; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 40px; }
+  @media (max-width: 560px) {
+    .card-top { flex-wrap: wrap; }
+    .detail { margin-left: 0; }
+    .count { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h1>Rujuk</h1>
+  </header>
+  <p class="tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, DOI-nya tepat, dan datanya cocok.</p>
+
+  <section class="panel">
+    <label class="lead" for="input">Tempel daftar pustaka</label>
+    <textarea id="input" spellcheck="false" placeholder="Contoh:
+Sugiyono. (2019). Metode penelitian kuantitatif, kualitatif, dan R&amp;D. Alfabeta.
+Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; of goal pursuits: Human needs and the self-determination of behavior. Psychological Inquiry, 11(4), 227–268. https://doi.org/10.1207/S15327965PLI1104_01"></textarea>
+    <p class="hint">Satu referensi per baris (atau pisahkan dengan baris kosong). Mendukung gaya APA, IEEE, Harvard, dan penomoran [1] atau 1.</p>
+    <div class="row">
+      <button class="primary" id="go">Periksa</button>
+      <button id="clear">Kosongkan</button>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="progress" id="progress"><div></div></div>
+    <div class="error" id="error" role="alert"></div>
+  </section>
+
+  <section id="out" hidden>
+    <div class="summary" id="summary"></div>
+    <div class="toolbar">
+      <button id="copy">Salin laporan</button>
+      <button id="csv">Unduh CSV</button>
+    </div>
+    <ol class="results" id="results"></ol>
+  </section>
+
+  <footer>
+    Data dicocokkan dengan Crossref dan OpenAlex. "Tidak ditemukan" tidak otomatis berarti fiktif: buku, prosiding, dan sebagian jurnal nasional belum tentu terindeks, jadi tetap periksa manual.
+  </footer>
+</div>
+
+<script>
+(() => {
+  const MAX_REFS = 150;
+  const BATCH = 5;
+  const $ = (id) => document.getElementById(id);
+  const input = $('input'), go = $('go'), countEl = $('count'), errEl = $('error');
+  const bar = $('progress'), barFill = bar.firstElementChild;
+  let results = [];
+  let filter = null;
+
+  const GROUPS = [
+    { key: 'valid', label: 'Ditemukan', match: (s) => s === 'valid' },
+    { key: 'periksa', label: 'Perlu dicek', match: (s) => s === 'periksa' },
+    { key: 'masalah', label: 'Bermasalah', match: (s) => ['doi_salah', 'doi_tidak_ada', 'tidak_ditemukan'].includes(s) },
+    { key: 'galat', label: 'Gagal diperiksa', match: (s) => s === 'galat' },
+  ];
+
+  const NUM = /^(\[\d+\]|\d+[.)])\s+/;
+  function splitRefs(text) {
+    text = text.replace(/\r/g, '').trim();
+    if (!text) return [];
+    let parts;
+    if (/\n\s*\n/.test(text)) {
+      parts = text.split(/\n\s*\n/);
+    } else {
+      const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+      const numbered = lines.filter((l) => NUM.test(l)).length;
+      if (numbered >= 2 && numbered < lines.length) {
+        parts = [];
+        for (const l of lines) {
+          if (NUM.test(l) || !parts.length) parts.push(l); else parts[parts.length - 1] += ' ' + l;
+        }
+      } else parts = lines;
+    }
+    return parts
+      .map((p) => p.replace(/\s+/g, ' ').replace(NUM, '').trim())
+      .filter((p) => p.length > 20 && !/^(daftar pustaka|referensi|references|bibliography|kepustakaan)$/i.test(p));
+  }
+
+  function updateCount() {
+    const n = splitRefs(input.value).length;
+    countEl.textContent = n ? `${n} referensi terdeteksi` + (n > MAX_REFS ? ` (maksimal ${MAX_REFS})` : '') : '';
+  }
+  input.addEventListener('input', updateCount);
+
+  $('clear').onclick = () => { input.value = ''; updateCount(); $('out').hidden = true; errEl.textContent = ''; input.focus(); };
+
+  go.onclick = async () => {
+    errEl.textContent = '';
+    const refs = splitRefs(input.value).slice(0, MAX_REFS);
+    if (!refs.length) { errEl.textContent = 'Belum ada referensi yang bisa dibaca.'; return; }
+    go.disabled = true; go.textContent = 'Memeriksa…';
+    results = []; filter = null;
+    bar.style.display = 'block'; barFill.style.width = '0';
+    $('out').hidden = false; render();
+
+    try {
+      for (let i = 0; i < refs.length; i += BATCH) {
+        const chunk = refs.slice(i, i + BATCH);
+        const res = await fetch('/api/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ references: chunk }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Server tidak merespons dengan benar.');
+        results.push(...data.results);
+        barFill.style.width = Math.round((results.length / refs.length) * 100) + '%';
+        render();
+      }
+    } catch (e) {
+      errEl.textContent = e.message + (results.length ? ` (${results.length} dari ${refs.length} sudah diperiksa)` : '');
+    } finally {
+      go.disabled = false; go.textContent = 'Periksa';
+      setTimeout(() => { bar.style.display = 'none'; }, 600);
+    }
+  };
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function render() {
+    const sum = $('summary');
+    sum.replaceChildren();
+    for (const g of GROUPS) {
+      const n = results.filter((r) => g.match(r.status)).length;
+      if (g.key === 'galat' && !n) continue;
+      const b = el('button', 'stat' + (filter === g.key ? ' active' : ''));
+      b.append(el('b', null, String(n)), el('span', null, g.label));
+      b.onclick = () => { filter = filter === g.key ? null : g.key; render(); };
+      sum.append(b);
+    }
+
+    const list = $('results');
+    list.replaceChildren();
+    const g = GROUPS.find((x) => x.key === filter);
+    const shown = results.map((r, i) => [r, i]).filter(([r]) => !g || g.match(r.status));
+    if (!shown.length) { list.append(el('li', 'empty', results.length ? 'Tidak ada hasil pada kategori ini.' : 'Menunggu hasil…')); return; }
+
+    for (const [r, i] of shown) {
+      const li = el('li', 'card');
+      const top = el('div', 'card-top');
+      top.append(el('span', 'num', (i + 1) + '.'), el('span', 'ref', r.input), el('span', 'badge b-' + r.status, r.label));
+      li.append(top);
+
+      const d = el('div', 'detail');
+      if (r.match) {
+        const f = el('div', 'found');
+        f.append('Terdata: ');
+        const t = r.match.url ? el('a', null, r.match.title) : el('span', null, r.match.title);
+        if (r.match.url) { t.href = r.match.url; t.target = '_blank'; t.rel = 'noopener'; }
+        f.append(t);
+        const meta = [r.match.authors && r.match.authors.slice(0, 3).join(', ') + (r.match.authors.length > 3 ? ' dkk.' : ''), r.match.year, r.match.venue]
+          .filter(Boolean).join(' · ');
+        if (meta) f.append(el('div', null, meta + ` (${r.match.source})`));
+        d.append(f);
+      }
+      if (r.notes && r.notes.length) {
+        const ul = el('ul');
+        r.notes.forEach((n) => ul.append(el('li', null, n)));
+        d.append(ul);
+      }
+      if (d.childNodes.length) li.append(d);
+      list.append(li);
+    }
+  }
+
+  function reportText() {
+    return results.map((r, i) => {
+      const lines = [`${i + 1}. [${r.label}] ${r.input}`];
+      if (r.match) lines.push(`   Terdata: ${r.match.title}${r.match.year ? ' (' + r.match.year + ')' : ''}${r.match.doi ? ' — doi:' + r.match.doi : ''}`);
+      (r.notes || []).forEach((n) => lines.push('   - ' + n));
+      return lines.join('\n');
+    }).join('\n\n');
+  }
+
+  $('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(reportText()); $('copy').textContent = 'Tersalin ✓'; }
+    catch { $('copy').textContent = 'Gagal menyalin'; }
+    setTimeout(() => { $('copy').textContent = 'Salin laporan'; }, 1800);
+  };
+
+  $('csv').onclick = () => {
+    const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const head = ['No', 'Referensi', 'Status', 'Judul terdata', 'Tahun terdata', 'DOI terdata', 'Sumber', 'Catatan'];
+    const rows = results.map((r, i) => [i + 1, r.input, r.label, r.match && r.match.title, r.match && r.match.year,
+      r.match && r.match.doi, r.match && r.match.source, (r.notes || []).join(' | ')].map(esc).join(','));
+    const blob = new Blob(['﻿' + [head.map(esc).join(','), ...rows].join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'hasil-rujuk.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+})();
+</script>
+</body>
+</html>

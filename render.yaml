@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: rujuk
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: CONTACT_EMAIL
+        sync: false
