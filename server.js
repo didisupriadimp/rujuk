@@ -19,7 +19,7 @@ const MAX_REF_LENGTH = 1500;
 
 // Batas pemakaian per alamat IP (bisa diubah lewat environment variable)
 const RATE_WINDOW_MS = (Number(process.env.RATE_WINDOW_MIN) || 15) * 60 * 1000;
-const RATE_MAX_REFS = Number(process.env.RATE_MAX_REFS) || 300;
+const RATE_MAX_REFS = Number(process.env.RATE_MAX_REFS) || 600;
 const usage = new Map();
 
 function clientIp(req) {

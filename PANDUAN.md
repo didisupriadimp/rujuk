@@ -10,6 +10,8 @@ Panduan ini tidak memerlukan pengetahuan Git atau pemrograman. Perkiraan waktu: 
 | `lib/` | Logika membaca dan memeriksa referensi, serta indeks jurnal |
 | `data/` | Tempat file data SJR (untuk label Scopus Q1–Q4) |
 | `public/index.html` | Tampilan halaman yang dilihat pengguna |
+| `public/citecheck.js` | Logika pencocokan sitasi dengan daftar pustaka |
+| `public/docx.js` | Pembaca file Word (.docx) di browser |
 | `package.json` | Identitas aplikasi untuk Node.js |
 | `render.yaml` | Pengaturan otomatis untuk Render |
 | `.env.example` | Contoh pengaturan (tidak wajib diunggah) |
@@ -109,6 +111,36 @@ Bila ada versi baru: buka repositori di GitHub, klik file yang ingin diganti →
 
 ---
 
+## Fitur Cocokkan Sitasi
+
+Tab **Cocokkan Sitasi** memeriksa dua hal:
+
+1. Setiap penulis yang disitasi di naskah harus ada di daftar pustaka.
+2. Setiap referensi di daftar pustaka harus disitasi di naskah.
+
+Cara pakai: klik **Unggah .docx** untuk membaca naskah langsung dari file Word, atau tempel naskah di kotak kiri. Daftar pustaka boleh ikut ditempel di kotak yang sama; bagian setelah judul "Daftar Pustaka" / "References" dipisahkan otomatis, dan bagian "Lampiran" diabaikan. Daftar pustaka juga bisa ditempel di kotak kanan, atau diambil dari tab Cek Referensi.
+
+Yang dikenali:
+- Sitasi dalam kurung: (Sugiyono, 2019), (Deci & Ryan, 2000; Hattie, 2009), (Smith et al., 2020), (Moleong, 2017a, 2017b), (lihat Sugiyono, 2019, hlm. 45).
+- Sitasi naratif: Sugiyono (2019), Menurut Sugiyono (2019, hlm. 45), Al Harrasi et al. (2025), Adhantoro dkk. (2026), World Health Organization (2020).
+- Sitasi bernomor: [1], [2, 3], [2–4]. Nomor dicocokkan dengan nomor urut daftar pustaka.
+- Sitasi di catatan kaki dan catatan akhir (hanya bila naskah diunggah sebagai .docx), baik gaya penulis–tahun maupun gaya catatan kaki Chicago/Turabian, misalnya "Lexy J. Moleong, Metodologi Penelitian Kualitatif (Bandung: Remaja Rosdakarya, 2017), 12." Catatan "Ibid." dan "op. cit." dilewati.
+
+Tentang unggah .docx:
+- File dibaca di browser pengguna dan tidak dikirim ke server.
+- Yang dibaca: isi naskah, tabel, kotak teks, catatan kaki, dan catatan akhir. Teks yang dihapus dengan Track Changes diabaikan, begitu pula kode field Mendeley/Zotero (yang dibaca adalah teks sitasi yang tampil).
+- Baris daftar isi seperti "DAFTAR PUSTAKA ........ 45" tidak dianggap judul daftar pustaka.
+- Hanya format .docx. File .doc lama perlu disimpan ulang sebagai .docx; PDF belum didukung.
+- Butuh browser versi terbaru (Chrome, Edge, Firefox, atau Safari 16.4 ke atas).
+- Di tab **Cek Referensi** juga ada tombol **Ambil dari file .docx** yang langsung mengambil bagian daftar pustaka dari file Word.
+
+Hasil yang ditampilkan:
+- **Disitasi di naskah, tidak ada di daftar pustaka**, disertai kalimat tempat sitasi muncul. Bila namanya ada tetapi tahunnya beda, atau namanya mirip (misalnya "Sugiono" dan "Sugiyono"), aplikasi memberi saran.
+- **Ada di daftar pustaka, tidak disitasi di naskah.**
+- **Cocok, tetapi perlu diperhatikan**: huruf tahun tidak konsisten (2017a vs 2017), sitasi satu nama untuk referensi dua penulis, atau "et al./dkk." untuk referensi dengan dua penulis atau kurang.
+
+Pencocokan dilakukan di browser pengguna; isi naskah tidak dikirim ke server. Pencocokan memakai nama belakang penulis pertama dan tahun, jadi hasil untuk nama yang sangat umum atau nama lembaga tetap perlu dicek sekilas.
+
 ## Cara kerja pemeriksaan
 
 Setiap referensi melalui langkah berikut:
@@ -137,8 +169,8 @@ Arti status:
 
 ## Batasan bawaan
 
-- Maksimal 150 referensi per pemeriksaan.
-- Per alamat IP: 300 referensi per 15 menit. Bisa diubah lewat environment variable `RATE_MAX_REFS` dan `RATE_WINDOW_MIN` di Render.
+- Maksimal 500 referensi per pemeriksaan (cukup untuk skripsi, tesis, dan disertasi). Pemeriksaan ratusan referensi butuh beberapa menit.
+- Per alamat IP: 600 referensi per 15 menit. Bisa diubah lewat environment variable `RATE_MAX_REFS` dan `RATE_WINDOW_MIN` di Render.
 - Hasil disimpan sementara di memori server selama 24 jam agar pemeriksaan ulang lebih cepat.
 
 ## Pengaturan tambahan (opsional)

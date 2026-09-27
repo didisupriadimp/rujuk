@@ -73,8 +73,32 @@
   .chip.off { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
   .jname { color: var(--ink); }
   .empty { color: var(--muted); text-align: center; padding: 24px; }
+  .tabs { display: flex; gap: 6px; margin: 0 0 16px; border-bottom: 1px solid var(--line); }
+  .tab { border: none; background: none; border-radius: 0; padding: 10px 14px; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--brand); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid2 textarea { min-height: 280px; }
+  .labelrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .upload { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--brand); cursor: pointer; font-weight: 600; }
+  .upload input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .upload:focus-within { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
+  .fileinfo { font-size: 13px; color: var(--muted); margin-top: 6px; min-height: 1em; }
+  .linkbtn { border: none; background: none; padding: 0; color: var(--brand); font-size: 14px; text-decoration: underline; }
+  h2.sec { font-size: 17px; margin: 28px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h2.sec .n { font-size: 13px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--gray-bg); color: var(--gray); }
+  h2.sec.bad .n { background: var(--bad-bg); color: var(--bad); }
+  h2.sec.warn .n { background: var(--warn-bg); color: var(--warn); }
+  h2.sec.ok .n { background: var(--ok-bg); color: var(--ok); }
+  .cite { font-weight: 600; }
+  .ctx { font-size: 13px; color: var(--muted); margin-top: 6px; padding-left: 10px; border-left: 3px solid var(--line); }
+  .hintline { font-size: 14px; margin-top: 6px; }
+  .hintline.bad { color: var(--bad); } .hintline.warn { color: var(--warn); }
+  details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; margin-top: 20px; }
+  .stat.static { cursor: default; }
+  .note { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
   .error { color: var(--bad); margin-top: 12px; }
   footer { color: var(--muted); font-size: 13px; margin-top: 40px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
     .card-top { flex-wrap: wrap; }
     .detail { margin-left: 0; }
@@ -88,14 +112,24 @@
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <h1>Rujuk</h1>
   </header>
-  <p class="tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, DOI-nya tepat, dan datanya cocok.</p>
+  <p class="tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, DOI-nya tepat, dan cocok dengan sitasi di naskah.</p>
 
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-cek" aria-selected="true" aria-controls="pane-cek">Cek Referensi</button>
+    <button class="tab" role="tab" id="tab-sitasi" aria-selected="false" aria-controls="pane-sitasi">Cocokkan Sitasi</button>
+  </nav>
+
+  <div id="pane-cek" role="tabpanel" aria-labelledby="tab-cek">
   <section class="panel">
-    <label class="lead" for="input">Tempel daftar pustaka</label>
+    <div class="labelrow">
+      <label class="lead" for="input">Tempel daftar pustaka</label>
+      <label class="upload">Ambil dari file .docx<input type="file" id="file1" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+    </div>
     <textarea id="input" spellcheck="false" placeholder="Contoh:
 Sugiyono. (2019). Metode penelitian kuantitatif, kualitatif, dan R&amp;D. Alfabeta.
 Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; of goal pursuits: Human needs and the self-determination of behavior. Psychological Inquiry, 11(4), 227–268. https://doi.org/10.1207/S15327965PLI1104_01"></textarea>
     <p class="hint">Satu referensi per baris (atau pisahkan dengan baris kosong). Mendukung gaya APA, IEEE, Harvard, dan penomoran [1] atau 1. Buku dicek lewat judul, penulis, dan ISBN.</p>
+    <div class="fileinfo" id="fileinfo1"></div>
     <div class="row">
       <button class="primary" id="go">Periksa</button>
       <button id="clear">Kosongkan</button>
@@ -113,16 +147,59 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
     </div>
     <ol class="results" id="results"></ol>
   </section>
+  </div>
+
+  <div id="pane-sitasi" role="tabpanel" aria-labelledby="tab-sitasi" hidden>
+    <section class="panel">
+      <div class="grid2">
+        <div>
+          <div class="labelrow">
+            <label class="lead" for="naskah">Naskah</label>
+            <label class="upload">Unggah .docx<input type="file" id="file2" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+          </div>
+          <textarea id="naskah" spellcheck="false" placeholder="Tempel isi naskah di sini.
+
+Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pustaka&quot; / &quot;References&quot; akan dipisahkan otomatis."></textarea>
+        </div>
+        <div>
+          <div class="labelrow">
+            <label class="lead" for="pustaka">Daftar pustaka</label>
+            <button class="linkbtn" id="ambil">Ambil dari tab Cek Referensi</button>
+          </div>
+          <textarea id="pustaka" spellcheck="false" placeholder="Kosongkan bila daftar pustaka sudah ikut ditempel di kotak naskah."></textarea>
+        </div>
+      </div>
+      <div class="fileinfo" id="fileinfo2"></div>
+      <p class="hint">Mendukung sitasi penulis–tahun (APA, Harvard), baik dalam kurung (Sugiyono, 2019) maupun naratif Sugiyono (2019), termasuk et al./dkk., sitasi bernomor [1], [2–4], dan sitasi di catatan kaki (bila naskah diunggah sebagai .docx). File dan naskah diproses di browser Anda dan tidak dikirim ke server.</p>
+      <div class="row">
+        <button class="primary" id="cocok">Cocokkan</button>
+        <button id="clear2">Kosongkan</button>
+        <span class="count" id="count2"></span>
+      </div>
+      <div class="error" id="error2" role="alert"></div>
+    </section>
+
+    <section id="out2" hidden>
+      <div class="summary" id="summary2"></div>
+      <div class="toolbar">
+        <button id="kirim">Periksa referensi ini di tab Cek Referensi</button>
+        <button id="copy2">Salin laporan</button>
+      </div>
+      <div id="res2"></div>
+    </section>
+  </div>
 
   <footer>
     Data dicocokkan dengan Crossref, OpenAlex, PubMed, DOAJ, Google Books, dan Open Library.<span id="sjrinfo"></span> "Tidak ditemukan" tidak otomatis berarti fiktif: buku, prosiding, dan sebagian jurnal nasional belum tentu terindeks, jadi tetap periksa manual.
   </footer>
 </div>
 
+<script src="/citecheck.js"></script>
+<script src="/docx.js"></script>
 <script>
 (() => {
-  const MAX_REFS = 150;
-  const BATCH = 5;
+  const MAX_REFS = 500;
+  const BATCH = 8;
   const $ = (id) => document.getElementById(id);
   const input = $('input'), go = $('go'), countEl = $('count'), errEl = $('error');
   const bar = $('progress'), barFill = bar.firstElementChild;
@@ -146,24 +223,7 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
 
   const NUM = /^(\[\d+\]|\d+[.)])\s+/;
   function splitRefs(text) {
-    text = text.replace(/\r/g, '').trim();
-    if (!text) return [];
-    let parts;
-    if (/\n\s*\n/.test(text)) {
-      parts = text.split(/\n\s*\n/);
-    } else {
-      const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
-      const numbered = lines.filter((l) => NUM.test(l)).length;
-      if (numbered >= 2 && numbered < lines.length) {
-        parts = [];
-        for (const l of lines) {
-          if (NUM.test(l) || !parts.length) parts.push(l); else parts[parts.length - 1] += ' ' + l;
-        }
-      } else parts = lines;
-    }
-    return parts
-      .map((p) => p.replace(/\s+/g, ' ').replace(NUM, '').trim())
-      .filter((p) => p.length > 20 && !/^(daftar pustaka|referensi|references|bibliography|kepustakaan)$/i.test(p));
+    return CiteCheck.splitRefs(text).map((r) => r.text);
   }
 
   function updateCount() {
@@ -172,7 +232,31 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
   }
   input.addEventListener('input', updateCount);
 
-  $('clear').onclick = () => { input.value = ''; updateCount(); $('out').hidden = true; errEl.textContent = ''; input.focus(); };
+  $('file1').addEventListener('change', async (ev) => {
+    const f = ev.target.files[0];
+    ev.target.value = '';
+    if (!f) return;
+    const infoEl = $('fileinfo1');
+    errEl.textContent = '';
+    infoEl.textContent = `Membaca ${f.name}…`;
+    try {
+      const d = await DocxText.read(f);
+      const { refs } = CiteCheck.splitManuscript(d.text);
+      if (!refs) {
+        infoEl.textContent = '';
+        errEl.textContent = `Judul "Daftar Pustaka" atau "References" tidak ditemukan di ${f.name}. Pastikan judul itu berada di baris tersendiri, atau salin daftar pustakanya secara manual.`;
+        return;
+      }
+      input.value = refs;
+      updateCount();
+      infoEl.textContent = `Daftar pustaka diambil dari ${f.name}.`;
+    } catch (e) {
+      infoEl.textContent = '';
+      errEl.textContent = e.message;
+    }
+  });
+
+  $('clear').onclick = () => { input.value = ''; $('fileinfo1').textContent = ''; updateCount(); $('out').hidden = true; errEl.textContent = ''; input.focus(); };
 
   go.onclick = async () => {
     errEl.textContent = '';
@@ -308,6 +392,221 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
     a.download = 'hasil-rujuk.csv';
     a.click();
     URL.revokeObjectURL(a.href);
+  };
+})();
+</script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  };
+
+  // ---- Tab ----
+  function show(which) {
+    const cek = which === 'cek';
+    $('tab-cek').setAttribute('aria-selected', String(cek));
+    $('tab-sitasi').setAttribute('aria-selected', String(!cek));
+    $('pane-cek').hidden = !cek;
+    $('pane-sitasi').hidden = cek;
+  }
+  $('tab-cek').onclick = () => show('cek');
+  $('tab-sitasi').onclick = () => show('sitasi');
+
+  // ---- Cocokkan sitasi ----
+  const naskah = $('naskah'), pustaka = $('pustaka'), err = $('error2');
+  let last = null;
+  let docNotes = [];
+
+  $('file2').addEventListener('change', async (ev) => {
+    const f = ev.target.files[0];
+    ev.target.value = '';
+    if (!f) return;
+    const infoEl = $('fileinfo2');
+    err.textContent = '';
+    infoEl.textContent = `Membaca ${f.name}…`;
+    try {
+      const d = await DocxText.read(f);
+      naskah.value = d.text;
+      docNotes = d.notes;
+      updateCount();
+      infoEl.textContent = `${f.name}: ±${d.words.toLocaleString('id-ID')} kata` + (d.notes.length ? `, ${d.notes.length} catatan kaki/akhir ikut diperiksa.` : '.');
+    } catch (e) {
+      infoEl.textContent = '';
+      err.textContent = e.message;
+    }
+  });
+
+  function sources() {
+    const split = CiteCheck.splitManuscript(naskah.value);
+    const refsText = pustaka.value.trim() ? pustaka.value : split.refs;
+    const body = pustaka.value.trim() ? naskah.value : split.body;
+    return { body, refsText, autoSplit: !pustaka.value.trim() && !!split.refs };
+  }
+
+  function updateCount() {
+    const { refsText, autoSplit } = sources();
+    const n = CiteCheck.splitRefs(refsText).length;
+    $('count2').textContent = n ? `${n} referensi terdeteksi${autoSplit ? ' (dari naskah)' : ''}` : '';
+  }
+  naskah.addEventListener('input', () => {
+    if (!naskah.value.trim()) { docNotes = []; $('fileinfo2').textContent = ''; }
+    updateCount();
+  });
+  pustaka.addEventListener('input', updateCount);
+
+  $('ambil').onclick = () => {
+    const v = $('input').value.trim();
+    if (!v) { err.textContent = 'Kotak daftar pustaka di tab Cek Referensi masih kosong.'; return; }
+    err.textContent = '';
+    pustaka.value = v; updateCount();
+  };
+
+  $('clear2').onclick = () => {
+    naskah.value = ''; pustaka.value = ''; err.textContent = ''; docNotes = []; $('fileinfo2').textContent = '';
+    $('out2').hidden = true; updateCount(); naskah.focus();
+  };
+
+  $('cocok').onclick = () => {
+    err.textContent = '';
+    const { body, refsText } = sources();
+    if (!body.trim()) { err.textContent = 'Naskah masih kosong.'; return; }
+    if (!CiteCheck.splitRefs(refsText).length) {
+      err.textContent = 'Daftar pustaka tidak ditemukan. Tempel di kotak kanan, atau pastikan naskah memuat judul "Daftar Pustaka" atau "References" di baris tersendiri.';
+      return;
+    }
+    last = CiteCheck.compare(body, refsText, { notes: docNotes });
+    last.refsText = refsText;
+    render(last);
+  };
+
+  function stat(n, label) {
+    const b = el('div', 'stat static');
+    b.append(el('b', null, String(n)), el('span', null, label));
+    return b;
+  }
+
+  function section(title, n, tone) {
+    const h = el('h2', 'sec ' + (tone || ''));
+    h.append(el('span', null, title), el('span', 'n', String(n)));
+    return h;
+  }
+
+  function contexts(li, list) {
+    (list || []).forEach((c) => li.append(el('div', 'ctx', c)));
+  }
+
+  function render(r) {
+    $('out2').hidden = false;
+    const sum = $('summary2');
+    sum.replaceChildren(
+      stat(r.totalCites, r.mode === 'nomor' ? 'Sitasi bernomor di naskah' : (r.noteCites ? `Sitasi di naskah (${r.noteCites} di catatan kaki)` : 'Sitasi di naskah')),
+      stat(r.refCount, 'Referensi di daftar pustaka'),
+      stat(r.missing.length, 'Sitasi tanpa referensi'),
+      stat(r.uncited.length, 'Referensi tidak disitasi'),
+    );
+    const out = $('res2');
+    out.replaceChildren();
+
+    if (!r.totalCites) {
+      out.append(el('p', 'empty', 'Tidak ada sitasi yang terbaca di naskah. Pastikan formatnya seperti (Sugiyono, 2019), Sugiyono (2019), atau [1].'));
+    }
+
+    // 1. Sitasi tanpa referensi
+    out.append(section('Disitasi di naskah, tidak ada di daftar pustaka', r.missing.length, r.missing.length ? 'bad' : 'ok'));
+    if (!r.missing.length) out.append(el('p', 'note', 'Semua sitasi di naskah punya pasangan di daftar pustaka.'));
+    else {
+      const ol = el('ol', 'results');
+      for (const m of r.missing) {
+        const li = el('li', 'card');
+        const top = el('div', 'card-top');
+        top.append(el('span', 'ref cite', m.label), el('span', 'badge ' + (m.yearMismatch ? 'b-periksa' : 'b-tidak_ditemukan'), m.yearMismatch ? 'Tahun berbeda' : 'Tidak ada'));
+        li.append(top);
+        if (m.count > 1) li.append(el('div', 'note', `Muncul ${m.count} kali di naskah.`));
+        if (m.suggestion) li.append(el('div', 'hintline warn', m.suggestion));
+        contexts(li, m.contexts);
+        ol.append(li);
+      }
+      out.append(ol);
+    }
+
+    // 2. Referensi tidak disitasi
+    out.append(section('Ada di daftar pustaka, tidak disitasi di naskah', r.uncited.length, r.uncited.length ? 'bad' : 'ok'));
+    if (!r.uncited.length) out.append(el('p', 'note', 'Semua referensi di daftar pustaka disitasi di naskah.'));
+    else {
+      const ol = el('ol', 'results');
+      for (const u of r.uncited) {
+        const li = el('li', 'card');
+        const top = el('div', 'card-top');
+        top.append(el('span', 'num', r.mode === 'nomor' ? `[${u.no}]` : u.no + '.'), el('span', 'ref', u.text));
+        li.append(top);
+        ol.append(li);
+      }
+      out.append(ol);
+    }
+
+    // 3. Cocok, tetapi perlu diperhatikan
+    if (r.warnings.length) {
+      out.append(section('Cocok, tetapi perlu diperhatikan', r.warnings.length, 'warn'));
+      const ol = el('ol', 'results');
+      for (const w of r.warnings) {
+        const li = el('li', 'card');
+        li.append(el('div', 'cite', w.label));
+        w.notes.forEach((n) => li.append(el('div', 'hintline warn', n)));
+        contexts(li, w.contexts.slice(0, 1));
+        ol.append(li);
+      }
+      out.append(ol);
+    }
+
+    // 4. Semua yang cocok
+    if (r.matched.length) {
+      const d = el('details', 'more');
+      d.append(el('summary', null, `Lihat ${r.matched.length} referensi yang cocok`));
+      const ol = el('ol', 'results');
+      ol.style.marginTop = '10px';
+      for (const m of r.matched) {
+        const li = el('li', 'card');
+        const top = el('div', 'card-top');
+        top.append(el('span', 'ref', m.text), el('span', 'badge b-valid', `${m.count}× disitasi`));
+        li.append(top);
+        ol.append(li);
+      }
+      d.append(ol);
+      out.append(d);
+    }
+    out.append(el('p', 'note', r.mode === 'nomor'
+      ? 'Mode sitasi bernomor: nomor di naskah dicocokkan dengan nomor urut daftar pustaka.'
+      : 'Pencocokan memakai nama belakang penulis pertama dan tahun. Periksa ulang hasil yang janggal, terutama untuk nama lembaga atau nama yang sangat umum.'));
+  }
+
+  $('copy2').onclick = async () => {
+    if (!last) return;
+    const r = last;
+    const lines = [`Pencocokan sitasi — ${r.totalCites} sitasi, ${r.refCount} referensi`, ''];
+    lines.push(`A. Disitasi di naskah, tidak ada di daftar pustaka (${r.missing.length})`);
+    r.missing.forEach((m, i) => lines.push(`${i + 1}. ${m.label}${m.count > 1 ? ` — ${m.count} kali` : ''}${m.suggestion ? ` — ${m.suggestion}` : ''}`));
+    lines.push('', `B. Ada di daftar pustaka, tidak disitasi (${r.uncited.length})`);
+    r.uncited.forEach((u, i) => lines.push(`${i + 1}. ${u.text}`));
+    if (r.warnings.length) {
+      lines.push('', `C. Perlu diperhatikan (${r.warnings.length})`);
+      r.warnings.forEach((w, i) => lines.push(`${i + 1}. ${w.label} — ${w.notes.join(' ')}`));
+    }
+    try { await navigator.clipboard.writeText(lines.join('\n')); $('copy2').textContent = 'Tersalin ✓'; }
+    catch { $('copy2').textContent = 'Gagal menyalin'; }
+    setTimeout(() => { $('copy2').textContent = 'Salin laporan'; }, 1800);
+  };
+
+  $('kirim').onclick = () => {
+    if (!last) return;
+    const input = $('input');
+    input.value = last.refsText.trim();
+    input.dispatchEvent(new Event('input'));
+    show('cek');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 })();
 </script>
