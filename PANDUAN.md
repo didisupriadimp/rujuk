@@ -7,7 +7,8 @@ Panduan ini tidak memerlukan pengetahuan Git atau pemrograman. Perkiraan waktu: 
 | File | Fungsi |
 |---|---|
 | `server.js` | Program utama (server web) |
-| `lib/` | Logika membaca dan memeriksa referensi |
+| `lib/` | Logika membaca dan memeriksa referensi, serta indeks jurnal |
+| `data/` | Tempat file data SJR (untuk label Scopus Q1–Q4) |
 | `public/index.html` | Tampilan halaman yang dilihat pengguna |
 | `package.json` | Identitas aplikasi untuk Node.js |
 | `render.yaml` | Pengaturan otomatis untuk Render |
@@ -69,11 +70,37 @@ Smith, J. (2021). A fabricated study of nothing at all. Journal of Imaginary Res
 
 Hasil yang diharapkan: dua pertama **Ditemukan**, yang ketiga **DOI tidak terdaftar**.
 
-## Langkah 5 — Memperbarui aplikasi
+## Langkah 5 — Mengaktifkan label indeks Scopus (Q1–Q4)
+
+Label seperti **Scopus Q2** diambil dari data SCImago Journal Rank (SJR), yang dihitung dari data Scopus. Data ini berupa satu file CSV yang Anda unduh sendiri, lalu ditaruh di folder `data/`.
+
+1. Buka [scimagojr.com/journalrank.php](https://www.scimagojr.com/journalrank.php) dan klik **Download data**. File seperti `scimagojr 2024.csv` akan terunduh (ukurannya sekitar 10 MB).
+2. Di Finder, pindahkan file itu ke dalam folder `data` di folder proyek `rujuk`.
+3. Di GitHub, buka repositori `rujuk` → **Add file** → **Upload files**, lalu seret **folder `data`** (bukan hanya file CSV-nya) ke halaman unggah. Cara ini membuat file masuk ke folder `data/` di GitHub.
+4. Klik **Commit changes**. Render memasang ulang otomatis.
+5. Setelah aplikasi aktif, di bagian bawah halaman akan muncul keterangan "Status indeks jurnal memakai data SCImago Journal Rank (SJR) 2024". Itu tanda data sudah terbaca.
+
+Perbarui data ini setahun sekali, saat SCImago merilis peringkat baru. Unggah file tahun terbaru; file lama boleh dihapus.
+
+**Catatan lisensi:** sebelum aplikasi dijual, baca syarat pemakaian data di situs SCImago dan pastikan pemakaian untuk layanan berbayar diizinkan. Aplikasi sudah mencantumkan SCImago sebagai sumber dan menautkan setiap label ke halaman jurnalnya.
+
+Label yang mungkin muncul pada setiap referensi:
+
+| Label | Arti |
+|---|---|
+| **Scopus Q1–Q4** | Jurnal ada di daftar SJR beserta kuartil terbaiknya. Klik untuk membuka halaman jurnal di SCImago. |
+| **Scopus · tidak aktif** | Cakupan Scopus jurnal ini sudah berakhir (misalnya dihentikan). |
+| **conference and proceedings / book series** | Sumbernya bukan jurnal, tetapi tetap terindeks. Biasanya tanpa kuartil. |
+| **Tidak ditemukan di daftar SJR** | Nama/ISSN jurnal tidak ada di data SJR. |
+| **DOAJ** | Artikel ditemukan di Directory of Open Access Journals. |
+
+Aplikasi juga memberi peringatan bila tahun terbit berada di luar periode cakupan Scopus jurnal tersebut, atau bila jurnalnya terdaftar di Scopus tetapi artikelnya tidak ditemukan. Keduanya tanda kuat untuk diperiksa ulang.
+
+## Langkah 6 — Memperbarui aplikasi
 
 Bila ada versi baru: buka repositori di GitHub, klik file yang ingin diganti → ikon pensil untuk mengedit, atau **Add file → Upload files** untuk menimpa file lama. Setelah **Commit changes**, Render otomatis memasang ulang dalam beberapa menit.
 
-## Langkah 6 — Domain sendiri (opsional)
+## Langkah 7 — Domain sendiri (opsional)
 
 1. Beli domain di registrar mana pun (misalnya Niagahoster, Rumahweb, Namecheap, Cloudflare).
 2. Di Render: buka layanan `rujuk` → **Settings** → **Custom Domains** → **Add Custom Domain**, masukkan domain Anda.
@@ -86,9 +113,10 @@ Bila ada versi baru: buka repositori di GitHub, klik file yang ingin diganti →
 
 Setiap referensi melalui langkah berikut:
 
-1. **Ada DOI?** Dicek ke Crossref (lalu OpenAlex). Judul dari DOI dibandingkan dengan judul yang Anda tulis.
+1. **Ada DOI?** Dicek berurutan ke Crossref, OpenAlex, PubMed, dan DOAJ. Judul dari DOI dibandingkan dengan judul yang Anda tulis.
 2. **DOI tidak ditemukan?** Dicek ke doi.org apakah DOI itu terdaftar sama sekali.
-3. **Tanpa DOI?** Dicari berdasarkan teks referensi di Crossref dan OpenAlex, lalu dinilai kemiripan judul, tahun, dan nama penulis.
+3. **Tanpa DOI?** Dicari dulu di Crossref dan OpenAlex. Bila belum ada yang cocok, pencarian dilanjutkan ke PubMed (kesehatan/kedokteran) dan DOAJ (jurnal open access, termasuk banyak jurnal Indonesia). Lalu dinilai kemiripan judul, tahun, dan nama penulis.
+4. **Indeks jurnal.** Nama jurnal atau ISSN dicocokkan dengan data SJR untuk menampilkan label Scopus Q1–Q4.
 
 Arti status:
 
@@ -106,6 +134,10 @@ Arti status:
 - Maksimal 150 referensi per pemeriksaan.
 - Per alamat IP: 300 referensi per 15 menit. Bisa diubah lewat environment variable `RATE_MAX_REFS` dan `RATE_WINDOW_MIN` di Render.
 - Hasil disimpan sementara di memori server selama 24 jam agar pemeriksaan ulang lebih cepat.
+
+## Pengaturan tambahan (opsional)
+
+- `NCBI_API_KEY`: API key gratis dari akun NCBI (ncbi.nlm.nih.gov → Account settings → API Key Management). Tanpa key, PubMed dibatasi 3 permintaan per detik. Dengan key, 10 per detik. Isi di Render lewat **Environment** → **Add Environment Variable**.
 
 ## Catatan paket Render
 

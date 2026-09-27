@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>REFDETECTOR — Pemeriksa Daftar Pustaka</title>
+<title>Rujuk — Pemeriksa Daftar Pustaka</title>
 <meta name="description" content="Periksa apakah referensi di daftar pustaka benar-benar ada, DOI-nya benar, dan datanya cocok.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f5c4a'/%3E%3Cpath d='M10 16.5l4 4 8-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
@@ -65,6 +65,13 @@
   .detail .found { color: var(--ink); }
   .detail ul { margin: 6px 0 0; padding-left: 18px; }
   .detail a { color: var(--brand); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
+  .chip { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); text-decoration: none; }
+  a.chip:hover { border-color: var(--brand); }
+  .chip.scopus { color: var(--brand); background: var(--brand-soft); border-color: transparent; }
+  .chip.doaj { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+  .chip.off { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
+  .jname { color: var(--ink); }
   .empty { color: var(--muted); text-align: center; padding: 24px; }
   .error { color: var(--bad); margin-top: 12px; }
   footer { color: var(--muted); font-size: 13px; margin-top: 40px; }
@@ -79,7 +86,7 @@
 <div class="wrap">
   <header>
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <h1>REFDETECTOR</h1>
+    <h1>Rujuk</h1>
   </header>
   <p class="tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, DOI-nya tepat, dan datanya cocok.</p>
 
@@ -108,7 +115,7 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
   </section>
 
   <footer>
-    Data dicocokkan dengan Crossref dan OpenAlex. "Tidak ditemukan" tidak otomatis berarti fiktif: buku, prosiding, dan sebagian jurnal nasional belum tentu terindeks, jadi tetap periksa manual.
+    Data dicocokkan dengan Crossref, OpenAlex, PubMed, dan DOAJ.<span id="sjrinfo"></span> "Tidak ditemukan" tidak otomatis berarti fiktif: buku, prosiding, dan sebagian jurnal nasional belum tentu terindeks, jadi tetap periksa manual.
   </footer>
 </div>
 
@@ -121,12 +128,20 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
   const bar = $('progress'), barFill = bar.firstElementChild;
   let results = [];
   let filter = null;
+  const info = { sjr: null };
+  fetch('/api/info').then((r) => r.json()).then((d) => {
+    if (d.sjr && d.sjr.loaded) {
+      info.sjr = d.sjr;
+      $('sjrinfo').textContent = ` Status indeks jurnal memakai data SCImago Journal Rank (SJR) ${d.sjr.year || ''}, yang berbasis data Scopus.`;
+    }
+  }).catch(() => {});
 
   const GROUPS = [
-    { key: 'valid', label: 'Ditemukan', match: (s) => s === 'valid' },
-    { key: 'periksa', label: 'Perlu dicek', match: (s) => s === 'periksa' },
-    { key: 'masalah', label: 'Bermasalah', match: (s) => ['doi_salah', 'doi_tidak_ada', 'tidak_ditemukan'].includes(s) },
-    { key: 'galat', label: 'Gagal diperiksa', match: (s) => s === 'galat' },
+    { key: 'valid', label: 'Ditemukan', match: (r) => r.status === 'valid' },
+    { key: 'periksa', label: 'Perlu dicek', match: (r) => r.status === 'periksa' },
+    { key: 'masalah', label: 'Bermasalah', match: (r) => ['doi_salah', 'doi_tidak_ada', 'tidak_ditemukan'].includes(r.status) },
+    { key: 'scopus', label: 'Di jurnal Scopus', match: (r) => !!(r.journal && r.journal.scopus), optional: true },
+    { key: 'galat', label: 'Gagal diperiksa', match: (r) => r.status === 'galat', optional: true },
   ];
 
   const NUM = /^(\[\d+\]|\d+[.)])\s+/;
@@ -201,8 +216,8 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
     const sum = $('summary');
     sum.replaceChildren();
     for (const g of GROUPS) {
-      const n = results.filter((r) => g.match(r.status)).length;
-      if (g.key === 'galat' && !n) continue;
+      const n = results.filter((r) => g.match(r)).length;
+      if (g.optional && !n) continue;
       const b = el('button', 'stat' + (filter === g.key ? ' active' : ''));
       b.append(el('b', null, String(n)), el('span', null, g.label));
       b.onclick = () => { filter = filter === g.key ? null : g.key; render(); };
@@ -212,7 +227,7 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
     const list = $('results');
     list.replaceChildren();
     const g = GROUPS.find((x) => x.key === filter);
-    const shown = results.map((r, i) => [r, i]).filter(([r]) => !g || g.match(r.status));
+    const shown = results.map((r, i) => [r, i]).filter(([r]) => !g || g.match(r));
     if (!shown.length) { list.append(el('li', 'empty', results.length ? 'Tidak ada hasil pada kategori ini.' : 'Menunggu hasil…')); return; }
 
     for (const [r, i] of shown) {
@@ -233,6 +248,7 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
         if (meta) f.append(el('div', null, meta + ` (${r.match.source})`));
         d.append(f);
       }
+      if (r.journal) d.append(journalLine(r.journal));
       if (r.notes && r.notes.length) {
         const ul = el('ul');
         r.notes.forEach((n) => ul.append(el('li', null, n)));
@@ -243,10 +259,32 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
     }
   }
 
+  function journalLine(j) {
+    const box = el('div', 'chips');
+    box.append(el('span', 'jname', j.name || 'Jurnal'));
+    if (j.scopus) {
+      const txt = 'Scopus' + (j.scopus.quartile ? ' ' + j.scopus.quartile : '') + (j.scopus.dataYear ? ` · SJR ${j.scopus.dataYear}` : '');
+      const c = el(j.scopus.url ? 'a' : 'span', 'chip ' + (j.scopus.active ? 'scopus' : 'off'), j.scopus.active ? txt : txt + ' · tidak aktif');
+      if (j.scopus.url) { c.href = j.scopus.url; c.target = '_blank'; c.rel = 'noopener'; c.title = 'Lihat di SCImago'; }
+      box.append(c);
+      if (j.scopus.type && !/journal/i.test(j.scopus.type)) box.append(el('span', 'chip', j.scopus.type));
+    } else if (info.sjr) {
+      box.append(el('span', 'chip', 'Tidak ditemukan di daftar SJR'));
+    }
+    if (j.doaj) box.append(el('span', 'chip doaj', 'DOAJ'));
+    return box;
+  }
+
+  function scopusText(j) {
+    if (!j || !j.scopus) return '';
+    return 'Scopus' + (j.scopus.quartile ? ' ' + j.scopus.quartile : '') + (j.scopus.active ? '' : ' (tidak aktif)');
+  }
+
   function reportText() {
     return results.map((r, i) => {
       const lines = [`${i + 1}. [${r.label}] ${r.input}`];
       if (r.match) lines.push(`   Terdata: ${r.match.title}${r.match.year ? ' (' + r.match.year + ')' : ''}${r.match.doi ? ' — doi:' + r.match.doi : ''}`);
+      if (r.journal) lines.push(`   Jurnal: ${r.journal.name || '-'}${r.journal.scopus ? ' — ' + scopusText(r.journal) : ''}${r.journal.doaj ? ' — DOAJ' : ''}`);
       (r.notes || []).forEach((n) => lines.push('   - ' + n));
       return lines.join('\n');
     }).join('\n\n');
@@ -260,9 +298,10 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
 
   $('csv').onclick = () => {
     const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-    const head = ['No', 'Referensi', 'Status', 'Judul terdata', 'Tahun terdata', 'DOI terdata', 'Sumber', 'Catatan'];
+    const head = ['No', 'Referensi', 'Status', 'Judul terdata', 'Tahun terdata', 'DOI terdata', 'Sumber', 'Jurnal', 'Indeks Scopus', 'DOAJ', 'Catatan'];
     const rows = results.map((r, i) => [i + 1, r.input, r.label, r.match && r.match.title, r.match && r.match.year,
-      r.match && r.match.doi, r.match && r.match.source, (r.notes || []).join(' | ')].map(esc).join(','));
+      r.match && r.match.doi, r.match && r.match.source, r.journal && r.journal.name, scopusText(r.journal),
+      r.journal && r.journal.doaj ? 'Ya' : '', (r.notes || []).join(' | ')].map(esc).join(','));
     const blob = new Blob(['﻿' + [head.map(esc).join(','), ...rows].join('\n')], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);

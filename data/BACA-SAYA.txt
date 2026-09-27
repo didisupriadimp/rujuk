@@ -1,0 +1,9 @@
+Letakkan file data SJR (unduhan dari scimagojr.com) di folder ini.
+
+1. Buka https://www.scimagojr.com/journalrank.php
+2. Klik tombol "Download data" (di bawah tabel, kanan).
+3. File bernama seperti "scimagojr <tahun>.csv" akan terunduh.
+4. Unggah file itu ke folder data/ di GitHub. Nama file bebas, asalkan berakhiran .csv.
+
+Tanpa file ini aplikasi tetap berjalan, hanya label indeks Scopus/SJR tidak muncul.
+Untuk memperbarui data tiap tahun: unggah file tahun terbaru. File lama boleh dihapus.

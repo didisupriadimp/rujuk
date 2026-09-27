@@ -7,6 +7,9 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { checkOne } = require('./lib/check');
+const journals = require('./lib/journals');
+
+journals.load();
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -107,6 +110,10 @@ async function handleCheck(req, res) {
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   if (req.method === 'GET' && url.pathname === '/health') return send(res, 200, { ok: true });
+  if (req.method === 'GET' && url.pathname === '/api/info') {
+    const j = journals.info();
+    return send(res, 200, { sjr: { loaded: j.loaded, year: j.year, count: j.count } });
+  }
   if (req.method === 'POST' && url.pathname === '/api/check') {
     return handleCheck(req, res).catch((e) => {
       console.error(e);

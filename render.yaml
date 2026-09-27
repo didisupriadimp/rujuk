@@ -9,3 +9,5 @@ services:
     envVars:
       - key: CONTACT_EMAIL
         sync: false
+      - key: NCBI_API_KEY
+        sync: false
