@@ -322,11 +322,16 @@ async function handleLynkWebhook(req, res, secret) {
     try { await store.addLog({ source: 'lynk', body: raw.slice(0, 20000), result }); } catch (e) { console.error('[webhook] log gagal:', e.message); }
   };
 
+  if (payload && /test/i.test(String(payload.event || ''))) {
+    await log('Tes webhook berhasil diterima. Sambungan Lynk → Rujuk sudah benar (webhook tes tidak membuat kode).');
+    return send(res, 200, { ok: true, test: true });
+  }
+
   const d = parseLynk(payload);
   if (!d.ok) { await log(`Diabaikan: status ${d.statuses.join(', ')}`); return send(res, 200, { ok: true, ignored: 'status' }); }
 
-  const plan = access.planForProduct(d.product) || access.planForProduct(d.allText);
-  if (!plan) { await log(`Paket tidak dikenali dari produk "${d.product || '-'}". Buat kode manual di admin, lalu sesuaikan kata "cocok" di config/paket.json.`); return send(res, 200, { ok: true, ignored: 'plan' }); }
+  const plan = access.planForProduct(d.product) || access.planForProduct(d.allText) || access.planForAmount(d.amount);
+  if (!plan) { await log(`Paket tidak dikenali dari produk "${d.product || '-'}" (nominal ${d.amount || '-'}). Buat kode manual di admin, lalu sesuaikan kata "cocok" di config/paket.json.`); return send(res, 200, { ok: true, ignored: 'plan' }); }
   if (!d.email && !d.phone) { await log('Tidak ada email maupun nomor WA pembeli (mungkin tes webhook). Kode tidak dibuat.'); return send(res, 200, { ok: true, ignored: 'contact' }); }
 
   const orderRef = d.orderRef ? `lynk:${d.orderRef}` : `lynk:sha:${crypto.createHash('sha256').update(raw).digest('hex').slice(0, 24)}`;
