@@ -91,8 +91,8 @@
   .access-msg { color: var(--bad); margin-top: 6px; }
   .linkbtn.strong { font-weight: 700; }
   .error a { color: inherit; font-weight: 600; }
-  .tabs { display: flex; gap: 6px; margin: 0 0 16px; border-bottom: 1px solid var(--line); }
-  .tab { border: none; background: none; border-radius: 0; padding: 10px 14px; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 16px; border-bottom: 1px solid var(--line); }
+  .tab { white-space: nowrap; border: none; background: none; border-radius: 0; padding: 10px 14px; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .tab[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--brand); }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .grid2 textarea { min-height: 280px; }
@@ -113,6 +113,38 @@
   .hintline.bad { color: var(--bad); } .hintline.warn { color: var(--warn); }
   details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; margin-top: 20px; }
   .stat.static { cursor: default; }
+  .st-controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; margin-top: 14px; }
+  .st-controls label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+  .st-controls label.check { display: flex; align-items: center; gap: 8px; color: var(--ink); padding-bottom: 8px; }
+  .st-controls select { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-width: 220px; }
+  .st-cards { display: grid; gap: 12px; }
+  .st-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .st-card.fixed { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+  .st-card-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .st-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .st-pane { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--bg); min-width: 0; }
+  .st-pane-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .02em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .st-pane-head a { text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--brand); }
+  .st-text { font: 15.5px/1.6 "Times New Roman", Times, serif; word-break: break-word; }
+  .st-orig { color: var(--muted); }
+  .st-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .st-acts button { padding: 5px 10px; font-size: 13px; }
+  .st-issues { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--warn); }
+  .st-edit { display: none; margin-top: 12px; border-top: 1px dashed var(--line); padding-top: 12px; }
+  .st-edit.open { display: block; }
+  .st-edit .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .st-edit label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .st-edit label.wide { grid-column: 1 / -1; }
+  .st-edit input, .st-edit select, .st-edit textarea { font: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); min-width: 0; }
+  .st-edit textarea { min-height: 70px; font-family: inherit; }
+  .st-final { margin-top: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; }
+  .st-final summary { cursor: pointer; font-weight: 600; }
+  .st-list { font: 16px/1.7 "Times New Roman", Times, serif; color: var(--ink); margin-top: 12px; }
+  .st-list p { margin: 0 0 10px; padding-left: 2.2em; text-indent: -2.2em; }
+  @media (max-width: 720px) { .st-grid { grid-template-columns: 1fr; } }
+  .chip.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
+  .chip.warn { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+  .chip.bad { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
   .note { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
   .error { color: var(--bad); margin-top: 12px; }
   footer { color: var(--muted); font-size: 13px; margin-top: 40px; }
@@ -131,13 +163,14 @@
     <h1>Rujuk</h1>
     <nav><a href="/harga">Harga</a></nav>
   </header>
-  <p class="tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, DOI-nya tepat, dan cocok dengan sitasi di naskah.</p>
+  <p class="tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, cocok dengan sitasi di naskah, dan sesuai style APA, IEEE, atau lainnya.</p>
 
   <div class="access" id="access" aria-live="polite"></div>
 
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-cek" aria-selected="true" aria-controls="pane-cek">Cek Referensi</button>
     <button class="tab" role="tab" id="tab-sitasi" aria-selected="false" aria-controls="pane-sitasi">Cocokkan Sitasi</button>
+    <button class="tab" role="tab" id="tab-style" aria-selected="false" aria-controls="pane-style">Perbaiki Style</button>
   </nav>
 
   <div id="pane-cek" role="tabpanel" aria-labelledby="tab-cek">
@@ -163,6 +196,7 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
   <section id="out" hidden>
     <div class="summary" id="summary"></div>
     <div class="toolbar">
+      <button id="tostyle">Perbaiki style daftar pustaka ini</button>
       <button id="copy">Salin laporan</button>
       <button id="csv">Unduh CSV</button>
     </div>
@@ -207,6 +241,58 @@ Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pust
         <button id="copy2">Salin laporan</button>
       </div>
       <div id="res2"></div>
+    </section>
+  </div>
+
+  <div id="pane-style" role="tabpanel" aria-labelledby="tab-style" hidden>
+    <section class="panel">
+      <div class="labelrow">
+        <label class="lead" for="st-input">Tempel daftar pustaka</label>
+        <span class="row" style="margin:0;gap:16px">
+          <label class="upload">Ambil dari file .docx<input type="file" id="st-file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+          <button class="linkbtn" id="st-ambil">Ambil dari tab Cek Referensi</button>
+        </span>
+      </div>
+      <textarea id="st-input" spellcheck="false" placeholder="Tempel daftar pustaka yang ingin dirapikan, satu referensi per baris.
+Contoh:
+Deci EL, Ryan RM. The what and why of goal pursuits. Psychological Inquiry. 2000;11(4):227-268. doi:10.1207/S15327965PLI1104_01
+Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakarya."></textarea>
+      <div class="fileinfo" id="st-fileinfo"></div>
+      <div class="st-controls">
+        <label>Style tujuan
+          <select id="st-style"></select>
+        </label>
+        <label>Bahasa istilah
+          <select id="st-lang">
+            <option value="en">Inggris (et al., and, pp.)</option>
+            <option value="id">Indonesia (dkk., dan, hlm.)</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="st-sentence"> Judul karya ditulis <i>sentence case</i></label>
+      </div>
+      <p class="hint">Perbaikan langsung dari teks yang Anda tempel, gratis dan tanpa kuota. Bila data sebuah referensi kurang lengkap (DOI, volume, halaman), klik <b>Lengkapi dari database</b> untuk mengambil data resminya; langkah ini memakai kuota Cek Referensi.</p>
+      <div class="row">
+        <button class="primary" id="st-go">Perbaiki</button>
+        <button id="st-clear">Kosongkan</button>
+        <span class="count" id="st-count"></span>
+      </div>
+      <div class="progress" id="st-progress"><div></div></div>
+      <div class="error" id="st-error" role="alert"></div>
+    </section>
+
+    <section id="st-out" hidden>
+      <div class="summary" id="st-summary"></div>
+      <div class="toolbar">
+        <button id="st-enrichall">Lengkapi semua dari database</button>
+        <button id="st-copyword">Salin semua untuk Word</button>
+        <button id="st-copytext">Salin teks biasa</button>
+        <button id="st-rtf">Unduh .rtf</button>
+      </div>
+      <div id="st-cards" class="st-cards"></div>
+      <details class="st-final" id="st-final">
+        <summary>Lihat daftar pustaka lengkap (urutan sesuai <span id="st-final-style">style</span>)</summary>
+        <div id="st-list" class="st-list"></div>
+      </details>
     </section>
   </div>
 
@@ -319,6 +405,7 @@ Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pust
         errEl.append(' ', a);
       }
     } finally {
+      window.RujukLastCheck = { refs: refs.slice(0, results.length), results: results.slice() };
       go.disabled = false; go.textContent = 'Periksa';
       setTimeout(() => { bar.style.display = 'none'; }, 600);
     }
@@ -444,15 +531,15 @@ RujukAccess.init(document.getElementById('access'));
   };
 
   // ---- Tab ----
+  const TABS = ['cek', 'sitasi', 'style'];
   function show(which) {
-    const cek = which === 'cek';
-    $('tab-cek').setAttribute('aria-selected', String(cek));
-    $('tab-sitasi').setAttribute('aria-selected', String(!cek));
-    $('pane-cek').hidden = !cek;
-    $('pane-sitasi').hidden = cek;
+    for (const t of TABS) {
+      $('tab-' + t).setAttribute('aria-selected', String(t === which));
+      $('pane-' + t).hidden = t !== which;
+    }
   }
-  $('tab-cek').onclick = () => show('cek');
-  $('tab-sitasi').onclick = () => show('sitasi');
+  window.RujukShowTab = show;
+  TABS.forEach((t) => { $('tab-' + t).onclick = () => show(t); });
 
   // ---- Cocokkan sitasi ----
   const naskah = $('naskah'), pustaka = $('pustaka'), err = $('error2');
@@ -648,5 +735,6 @@ RujukAccess.init(document.getElementById('access'));
   };
 })();
 </script>
+<script src="/style.js"></script>
 </body>
 </html>

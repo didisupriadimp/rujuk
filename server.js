@@ -13,6 +13,8 @@ const journals = require('./lib/journals');
 const access = require('./lib/access');
 const { parseLynk } = require('./lib/lynk');
 const mailer = require('./lib/mailer');
+const formatter = require('./lib/format');
+const cslLib = require('./lib/csl');
 const store = require('./lib/store').create();
 
 journals.load();
@@ -50,7 +52,7 @@ function windowTake(map, key, n, max, windowMs) {
 }
 setInterval(() => {
   const now = Date.now();
-  for (const m of [usage, lookups]) for (const [k, u] of m) if (now - u.start > RATE_WINDOW_MS) m.delete(k);
+  for (const m of [usage, lookups, formats]) for (const [k, u] of m) if (now - u.start > RATE_WINDOW_MS) m.delete(k);
 }, 60 * 1000).unref();
 
 // ---------------------------------------------------------------------------
@@ -93,13 +95,13 @@ function serveStatic(req, res) {
   });
 }
 
-function readBody(req) {
+function readBody(req, limit = MAX_BODY) {
   return new Promise((resolve, reject) => {
     let size = 0;
     const chunks = [];
     req.on('data', (c) => {
       size += c.length;
-      if (size > MAX_BODY) { reject(new Error('too_large')); req.destroy(); return; }
+      if (size > limit) { reject(new Error('too_large')); req.destroy(); return; }
       chunks.push(c);
     });
     req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
@@ -182,6 +184,37 @@ async function handleCheck(req, res) {
     info = { mode, remaining: access.trialRemaining(ip), per_day: access.getConfig().percobaan_gratis_per_hari };
   }
   send(res, 200, { results, access: info });
+}
+
+// Perbaiki Style: hanya memformat metadata yang sudah didapat dari /api/check (tidak memotong kuota)
+const formats = new Map();
+async function handleFormat(req, res) {
+  const ip = clientIp(req);
+  if (windowTake(formats, ip, 1, 120, RATE_WINDOW_MS)) return send(res, 429, { error: 'Terlalu banyak permintaan. Coba lagi beberapa menit lagi.' });
+  let body;
+  try { body = JSON.parse(await readBody(req, 2 * 1024 * 1024)); } catch (e) {
+    return send(res, e.message === 'too_large' ? 413 : 400, { error: 'Permintaan tidak valid.' });
+  }
+  const items = Array.isArray(body.items) ? body.items : [];
+  if (!items.length) return send(res, 400, { error: 'Tidak ada referensi untuk diformat.' });
+  if (items.length > 600) return send(res, 400, { error: 'Maksimal 600 referensi sekali format.' });
+  try {
+    // Tiap item: { csl } (metadata yang sudah ada/diedit) atau { text } (dibaca dari teks)
+    const csls = items.map((x) => {
+      if (x && x.csl && typeof x.csl === 'object') return x.csl;
+      if (x && typeof x.text === 'string') return cslLib.textToCsl(x.text.slice(0, 2000)) || {};
+      return {};
+    });
+    const out = formatter.format(csls, {
+      style: String(body.style || 'apa'), lang: body.lang === 'id' ? 'id' : 'en',
+      sentenceCase: typeof body.sentenceCase === 'boolean' ? body.sentenceCase : undefined,
+    });
+    out.items = csls.map((c) => ({ csl: c, issues: cslLib.issues(c) }));
+    send(res, 200, out);
+  } catch (e) {
+    console.error('[format]', e);
+    send(res, 400, { error: 'Gagal memformat: ' + e.message });
+  }
 }
 
 async function handleCodeStatus(req, res) {
@@ -363,6 +396,8 @@ const server = http.createServer((req, res) => {
   }
   if (req.method === 'POST' && p === '/api/check') return wrap(handleCheck)(req, res);
   if (req.method === 'POST' && p === '/api/code') return wrap(handleCodeStatus)(req, res);
+  if (req.method === 'GET' && p === '/api/styles') return send(res, 200, { styles: formatter.listStyles() });
+  if (req.method === 'POST' && p === '/api/format') return wrap(handleFormat)(req, res);
   const wh = p.match(/^\/api\/lynk\/webhook\/([^/]+)$/);
   if (req.method === 'POST' && wh) return wrap(handleLynkWebhook)(req, res, decodeURIComponent(wh[1]));
   if (p.startsWith('/api/admin/')) return wrap(handleAdmin)(req, res, url);

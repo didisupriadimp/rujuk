@@ -12,6 +12,9 @@ Panduan ini tidak memerlukan pengetahuan Git atau pemrograman. Perkiraan waktu: 
 | `public/index.html` | Tampilan halaman yang dilihat pengguna |
 | `public/citecheck.js` | Logika pencocokan sitasi dengan daftar pustaka |
 | `public/docx.js` | Pembaca file Word (.docx) di browser |
+| `public/style.js` | Tampilan Perbaiki Style |
+| `lib/format.js`, `lib/csl.js` | Mesin format sitasi dan pembaca metadata referensi |
+| `styles/` | File style (APA, IEEE, Harvard, Chicago, MLA, Vancouver) dan bahasa |
 | `public/access.js` | Kode akses, kuota, dan percobaan gratis di tampilan |
 | `public/harga.html` | Halaman Harga (`/harga`) |
 | `public/admin.html` | Halaman admin (`/admin`) |
@@ -22,7 +25,7 @@ Panduan ini tidak memerlukan pengetahuan Git atau pemrograman. Perkiraan waktu: 
 | `render.yaml` | Pengaturan otomatis untuk Render |
 | `.env.example` | Contoh pengaturan (tidak wajib diunggah) |
 
-Aplikasi hanya memakai satu pustaka tambahan (`pg`, untuk database) yang dipasang otomatis oleh Render lewat `npm install`. Jangan unggah folder `node_modules` ke GitHub.
+Aplikasi memakai dua pustaka tambahan (`pg` untuk database dan `citeproc` untuk format sitasi) yang dipasang otomatis oleh Render lewat `npm install`. Jangan unggah folder `node_modules` ke GitHub.
 
 ---
 
@@ -146,6 +149,31 @@ Hasil yang ditampilkan:
 - **Cocok, tetapi perlu diperhatikan**: huruf tahun tidak konsisten (2017a vs 2017), sitasi satu nama untuk referensi dua penulis, atau "et al./dkk." untuk referensi dengan dua penulis atau kurang.
 
 Pencocokan dilakukan di browser pengguna; isi naskah tidak dikirim ke server. Pencocokan memakai nama belakang penulis pertama dan tahun, jadi hasil untuk nama yang sangat umum atau nama lembaga tetap perlu dicek sekilas.
+
+## Fitur Perbaiki Style
+
+Tab **Perbaiki Style** merapikan daftar pustaka ke style yang dipilih: **APA 7th, IEEE, Harvard (Cite Them Right), Chicago (author-date), MLA 9th, atau Vancouver**.
+
+Cara pakai:
+1. Tempel daftar pustaka (atau ambil dari file .docx / dari tab Cek Referensi).
+2. Pilih style, bahasa istilah (Inggris: *et al., and, pp.* — Indonesia: *dkk., dan, hlm.*), dan apakah judul ditulis *sentence case* (bawaan menyala untuk APA).
+3. Klik **Perbaiki**. Proses ini **gratis dan tidak memakai kuota**, karena dibaca langsung dari teks.
+
+Hasil ditampilkan per referensi dalam dua kolom (**Asli** dan **Hasil**) dengan label:
+- **Dari teks Anda**: data dibaca dari tulisan pengguna. Periksa bila ada catatan kekurangan (DOI, volume, halaman, penerbit, penulis "et al.").
+- **Terdata: Crossref/OpenAlex/...**: data resmi dari database, paling akurat.
+- **Diedit manual**: data diubah lewat tombol Edit.
+
+Tombol per referensi:
+- **Lengkapi dari database (1 kuota)**: mencari data resmi (nama semua penulis, volume, halaman, DOI). Bisa juga sekaligus dengan **Lengkapi semua dari database**.
+- **Edit**: formulir untuk memperbaiki jenis karya, penulis, judul, jurnal, volume, halaman, penerbit, DOI, dan lain-lain.
+- **Tandai beres** dan **Salin**.
+
+Filter: *Semua*, *Perlu ditinjau*, *Sudah diperbaiki*, *Dari awal sesuai*.
+
+Ekspor: **Salin semua untuk Word** (miring, hanging indent, Times New Roman 12, spasi ganda), **Salin teks biasa**, atau **Unduh .rtf** (dibuka langsung di Word). Referensi yang sudah diperiksa di tab Cek Referensi bisa dikirim dengan tombol **Perbaiki style daftar pustaka ini** tanpa memakai kuota lagi. Mengganti style setelah diperbaiki juga gratis.
+
+Mesin format memakai citeproc-js dan file style resmi Citation Style Language (folder `styles/`), yang juga dipakai Zotero dan Mendeley.
 
 ## Cara kerja pemeriksaan
 

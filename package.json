@@ -12,6 +12,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "citeproc": "^2.4.63",
     "pg": "^8.13.0"
   }
 }

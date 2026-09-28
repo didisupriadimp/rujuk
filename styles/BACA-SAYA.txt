@@ -1,0 +1,8 @@
+File style (.csl) dan bahasa (locales-*.xml) di folder ini berasal dari
+Citation Style Language (https://citationstyles.org), proyek terbuka yang juga
+dipakai Zotero dan Mendeley. Lisensi: CC BY-SA 3.0.
+
+Sumber: https://github.com/citation-style-language/styles
+        https://github.com/citation-style-language/locales
+
+Untuk memperbarui, unduh ulang file yang sama dari sumber di atas.
