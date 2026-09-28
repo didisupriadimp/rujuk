@@ -15,6 +15,7 @@ const { parseLynk } = require('./lib/lynk');
 const mailer = require('./lib/mailer');
 const formatter = require('./lib/format');
 const cslLib = require('./lib/csl');
+const CiteCheck = require('./public/citecheck.js');
 const store = require('./lib/store').create();
 
 journals.load();
@@ -132,6 +133,53 @@ function denyReason(c, n) {
   return `Sisa kuota ${v.remaining} referensi, tidak cukup untuk ${n} referensi berikutnya.`;
 }
 
+// ---------------------------------------------------------------------------
+// Kuota bersama untuk semua fitur: 1 referensi = 1 kuota
+// ---------------------------------------------------------------------------
+function trialInfo(ip) {
+  return { mode: 'trial', remaining: access.trialRemaining(ip), per_day: access.getConfig().percobaan_gratis_per_hari };
+}
+
+// Memotong kuota n referensi. Mengembalikan objek "charge", atau null bila respons 402 sudah dikirim.
+async function takeCharge(req, res, n, noun = 'referensi') {
+  const ip = clientIp(req);
+  const codeInput = req.headers['x-access-code'];
+  if (codeInput) {
+    const code = access.normalizeCode(codeInput);
+    const used = code ? await store.consume(code, n) : null;
+    if (!used) {
+      const c = code ? await store.getCode(code) : null;
+      send(res, 402, { error: denyReason(c, n), reason: 'code', access: c ? { mode: 'code', ...access.publicView(c) } : null });
+      return null;
+    }
+    return { mode: 'code', code, ip };
+  }
+  if (!access.trialTake(ip, n)) {
+    const left = access.trialRemaining(ip);
+    const per = access.getConfig().percobaan_gratis_per_hari;
+    send(res, 402, {
+      error: left
+        ? `Kuota gratis tersisa ${left} referensi hari ini, sedangkan ${noun} ini membutuhkan ${n} kuota. Masukkan kode akses untuk melanjutkan.`
+        : `Kuota gratis hari ini (${per} referensi) sudah habis. Masukkan kode akses untuk melanjutkan.`,
+      reason: 'trial',
+      access: { mode: 'trial', remaining: left, per_day: per },
+    });
+    return null;
+  }
+  return { mode: 'trial', ip };
+}
+
+async function refundCharge(charge, n) {
+  if (!charge || n <= 0) return;
+  if (charge.mode === 'code') await store.refund(charge.code, n);
+  else access.trialRefund(charge.ip, n);
+}
+
+async function chargeInfo(charge) {
+  if (charge.mode === 'code') return { mode: 'code', ...access.publicView(await store.getCode(charge.code)) };
+  return trialInfo(charge.ip);
+}
+
 async function handleCheck(req, res) {
   let body;
   try {
@@ -144,49 +192,49 @@ async function handleCheck(req, res) {
   if (refs.length > MAX_REFS_PER_REQUEST) return send(res, 400, { error: `Maksimal ${MAX_REFS_PER_REQUEST} referensi per permintaan.` });
 
   const clean = refs.map((r) => String(r || '').slice(0, MAX_REF_LENGTH).trim()).filter(Boolean);
-  const ip = clientIp(req);
   const n = clean.length;
-  const wait = windowTake(usage, ip, n, RATE_MAX_REFS, RATE_WINDOW_MS);
+  const wait = windowTake(usage, clientIp(req), n, RATE_MAX_REFS, RATE_WINDOW_MS);
   if (wait) return send(res, 429, { error: `Batas pemakaian tercapai. Coba lagi dalam ${wait} menit.` });
 
   // Potong kuota di awal, kembalikan untuk referensi yang gagal diperiksa
-  const codeInput = req.headers['x-access-code'];
-  let mode = 'trial';
-  let code = null;
-  if (codeInput) {
-    code = access.normalizeCode(codeInput);
-    const used = code ? await store.consume(code, n) : null;
-    if (!used) {
-      const c = code ? await store.getCode(code) : null;
-      return send(res, 402, { error: denyReason(c, n), reason: 'code', access: c ? { mode: 'code', ...access.publicView(c) } : null });
-    }
-    mode = 'code';
-  } else if (!access.trialTake(ip, n)) {
-    const left = access.trialRemaining(ip);
-    const per = access.getConfig().percobaan_gratis_per_hari;
-    return send(res, 402, {
-      error: left
-        ? `Percobaan gratis tersisa ${left} referensi hari ini. Masukkan kode akses untuk memeriksa lebih banyak.`
-        : `Percobaan gratis (${per} referensi per hari) sudah habis. Masukkan kode akses untuk melanjutkan.`,
-      reason: 'trial',
-      access: { mode: 'trial', remaining: left, per_day: per },
-    });
-  }
-
+  const charge = await takeCharge(req, res, n);
+  if (!charge) return;
   const results = await Promise.all(clean.map((r) => checkOne(r)));
-  const failed = results.filter((r) => r.status === 'galat').length;
-  let info;
-  if (mode === 'code') {
-    await store.refund(code, failed);
-    info = { mode, ...access.publicView(await store.getCode(code)) };
-  } else {
-    access.trialRefund(ip, failed);
-    info = { mode, remaining: access.trialRemaining(ip), per_day: access.getConfig().percobaan_gratis_per_hari };
-  }
-  send(res, 200, { results, access: info });
+  await refundCharge(charge, results.filter((r) => r.status === 'galat').length);
+  send(res, 200, { results, access: await chargeInfo(charge) });
 }
 
-// Perbaiki Style: hanya memformat metadata yang sudah didapat dari /api/check (tidak memotong kuota)
+// Cocokkan Sitasi: kuota = jumlah referensi di daftar pustaka.
+// Naskah hanya diproses di memori untuk permintaan ini dan tidak disimpan.
+async function handleCiteCheck(req, res) {
+  let body;
+  try {
+    body = JSON.parse(await readBody(req, 8 * 1024 * 1024));
+  } catch (e) {
+    return send(res, e.message === 'too_large' ? 413 : 400, { error: e.message === 'too_large' ? 'Naskah terlalu besar (maksimal sekitar 8 MB teks).' : 'Permintaan tidak valid.' });
+  }
+  const manuscript = String(body.manuscript || '');
+  const refsText = String(body.references || '');
+  const notes = Array.isArray(body.notes) ? body.notes.map((x) => String(x || '').slice(0, 5000)).slice(0, 3000) : [];
+  if (!manuscript.trim()) return send(res, 400, { error: 'Naskah masih kosong.' });
+  const n = CiteCheck.splitRefs(refsText).length;
+  if (!n) return send(res, 400, { error: 'Daftar pustaka tidak ditemukan.' });
+  if (n > 1000) return send(res, 400, { error: 'Maksimal 1.000 referensi dalam daftar pustaka.' });
+
+  const charge = await takeCharge(req, res, n, 'daftar pustaka');
+  if (!charge) return;
+  let result;
+  try {
+    result = CiteCheck.compare(manuscript, refsText, { notes });
+  } catch (e) {
+    await refundCharge(charge, n);
+    console.error('[citecheck]', e);
+    return send(res, 500, { error: 'Gagal mencocokkan sitasi.' });
+  }
+  send(res, 200, { result, charged: n, access: await chargeInfo(charge) });
+}
+
+// Perbaiki Style: format ulang metadata (ganti style gratis)
 const formats = new Map();
 async function handleFormat(req, res) {
   const ip = clientIp(req);
@@ -199,12 +247,9 @@ async function handleFormat(req, res) {
   if (!items.length) return send(res, 400, { error: 'Tidak ada referensi untuk diformat.' });
   if (items.length > 600) return send(res, 400, { error: 'Maksimal 600 referensi sekali format.' });
   try {
-    // Tiap item: { csl } (metadata yang sudah ada/diedit) atau { text } (dibaca dari teks)
-    const csls = items.map((x) => {
-      if (x && x.csl && typeof x.csl === 'object') return x.csl;
-      if (x && typeof x.text === 'string') return cslLib.textToCsl(x.text.slice(0, 2000)) || {};
-      return {};
-    });
+    // Hanya memformat ulang metadata yang sudah didapat lewat /api/check (sudah dipotong kuota).
+    // Mengganti style, bahasa, atau mengedit data tidak memotong kuota.
+    const csls = items.map((x) => (x && x.csl && typeof x.csl === 'object' ? x.csl : {}));
     const out = formatter.format(csls, {
       style: String(body.style || 'apa'), lang: body.lang === 'id' ? 'id' : 'en',
       sentenceCase: typeof body.sentenceCase === 'boolean' ? body.sentenceCase : undefined,
@@ -395,6 +440,7 @@ const server = http.createServer((req, res) => {
     return send(res, 200, { mode: 'trial', remaining: access.trialRemaining(clientIp(req)), per_day: access.getConfig().percobaan_gratis_per_hari });
   }
   if (req.method === 'POST' && p === '/api/check') return wrap(handleCheck)(req, res);
+  if (req.method === 'POST' && p === '/api/citecheck') return wrap(handleCiteCheck)(req, res);
   if (req.method === 'POST' && p === '/api/code') return wrap(handleCodeStatus)(req, res);
   if (req.method === 'GET' && p === '/api/styles') return send(res, 200, { styles: formatter.listStyles() });
   if (req.method === 'POST' && p === '/api/format') return wrap(handleFormat)(req, res);

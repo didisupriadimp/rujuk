@@ -81,7 +81,7 @@
   // ---------------------------------------------------------------------------
   function updateCount() {
     const n = CiteCheck.splitRefs(input.value).length;
-    $('st-count').textContent = n ? `${n} referensi terdeteksi` : '';
+    $('st-count').textContent = n ? `${n} referensi terdeteksi · memakai ${n} kuota` : '';
   }
   input.addEventListener('input', updateCount);
 
@@ -119,28 +119,39 @@
     $('st-out').hidden = true; $('st-fileinfo').textContent = ''; setError(''); updateCount(); input.focus();
   };
 
-  // Hasil Cek Referensi yang cocok dipakai ulang (tanpa kuota)
-  function fromLastCheck(text) {
-    const last = window.RujukLastCheck;
-    if (!last) return null;
-    const k = last.refs.indexOf(text);
-    const r = k >= 0 ? last.results[k] : null;
-    return r && r.csl_verified && r.csl ? r : null;
-  }
-
-  $('st-go').onclick = () => {
+  // Perbaiki: cocokkan tiap referensi dengan database (1 kuota/referensi), lalu format
+  $('st-go').onclick = async () => {
+    if (busy) return;
     setError('');
     const refs = CiteCheck.splitRefs(input.value).map((r) => r.text);
     if (!refs.length) { setError('Belum ada referensi yang bisa dibaca.'); return; }
-    if (refs.length > 600) { setError('Maksimal 600 referensi sekali proses.'); return; }
-    items = refs.map((text) => {
-      const r = fromLastCheck(text);
-      return r
-        ? { text, csl: r.csl, source: r.csl_source, verified: true, fixed: false, checkLabel: r.label }
-        : { text, csl: null, source: 'teks', verified: false, fixed: false };
-    });
-    filter = 'all'; editing = null;
-    reformat(true);
+    if (refs.length > 500) { setError('Maksimal 500 referensi sekali proses.'); return; }
+    items = refs.map((text) => ({ text, csl: null, source: 'teks', verified: false, fixed: false, pending: true }));
+    filter = 'all'; editing = null; order = [];
+    busy = true;
+    const go = $('st-go');
+    go.disabled = true;
+    bar.style.display = 'block'; barFill.style.width = '0';
+    let done = 0;
+    try {
+      for (let k = 0; k < items.length;) {
+        const size = RujukAccess.batchSize(8);
+        const idx = items.map((_, i) => i).slice(k, k + size);
+        go.textContent = `Memproses… ${done}/${items.length}`;
+        const results = await checkRefs(idx.map((i) => items[i].text));
+        results.forEach((r, j) => applyCheck(items[idx[j]], r));
+        k += idx.length; done = k;
+        barFill.style.width = Math.round((done / items.length) * 100) + '%';
+      }
+    } catch (e) {
+      setError(e.message + (done ? ` (${done} dari ${items.length} referensi sudah diproses; sisanya belum.)` : ''), e.quota);
+    } finally {
+      busy = false;
+      go.disabled = false; go.textContent = 'Perbaiki';
+      setTimeout(() => { bar.style.display = 'none'; }, 600);
+    }
+    items = items.filter((it) => !it.pending);
+    if (items.length) await reformat(true);
   };
 
   // Tombol dari tab Cek Referensi
@@ -150,7 +161,6 @@
     if (!last || !last.results.length) return;
     input.value = last.refs.join('\n'); updateCount();
     window.RujukShowTab('style');
-    $('st-go').click();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -166,7 +176,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: items.map((it) => (it.csl ? { csl: it.csl } : { text: it.text })),
+          items: items.map((it) => ({ csl: it.csl || {} })),
           style: styleSel.value, lang: langSel.value, sentenceCase: sentence.checked,
         }),
       });
@@ -185,7 +195,7 @@
     } catch (e) {
       setError(e.message);
     } finally {
-      go.disabled = false; go.textContent = 'Perbaiki';
+      if (!busy) { go.disabled = false; go.textContent = 'Perbaiki'; }
     }
   }
 
@@ -206,61 +216,24 @@
   }
 
   function applyCheck(it, r) {
+    it.pending = false;
     it.checkLabel = r.label;
     it.similar = null;
+    it.csl = r.csl || r.csl_text || {};
     if (r.csl_verified && r.csl) {
-      it.csl = r.csl; it.source = r.csl_source; it.verified = true; it.fixed = true;
-      it.note = `Data dilengkapi dari ${r.csl_source}.`;
+      it.source = r.csl_source; it.verified = true;
+      it.note = `Data diambil dari ${r.csl_source}.`;
     } else if (r.match && r.match.csl && r.status === 'periksa') {
+      it.source = 'teks';
       it.similar = { csl: r.match.csl, source: r.match.source, title: r.match.title };
       it.note = `Ada karya yang mirip di ${r.match.source}, tetapi belum pasti sama. Periksa, lalu pakai datanya bila memang benar.`;
     } else {
-      it.note = `Tidak ada data yang cocok di database (${r.label}). Lengkapi manual lewat tombol Edit.`;
+      it.source = 'teks';
+      it.note = r.status === 'galat'
+        ? 'Database sedang tidak dapat dihubungi; data dibaca dari teks Anda (kuota referensi ini dikembalikan).'
+        : `Tidak ada data yang cocok di database (${r.label}). Data dibaca dari teks Anda; lengkapi lewat tombol Edit bila perlu.`;
     }
   }
-
-  async function enrich(i, btn) {
-    if (busy) return;
-    busy = true;
-    if (btn) { btn.disabled = true; btn.textContent = 'Mencari…'; }
-    setError('');
-    try {
-      const [r] = await checkRefs([items[i].text]);
-      applyCheck(items[i], r);
-      await reformat();
-    } catch (e) {
-      setError(e.message, e.quota);
-      render();
-    } finally { busy = false; }
-  }
-
-  $('st-enrichall').onclick = async () => {
-    if (busy) return;
-    const todo = items.map((it, i) => i).filter((i) => !items[i].verified);
-    if (!todo.length) { setError('Semua referensi sudah memakai data dari database.'); return; }
-    busy = true; setError('');
-    const btn = $('st-enrichall');
-    btn.disabled = true;
-    bar.style.display = 'block'; barFill.style.width = '0';
-    let done = 0;
-    try {
-      for (let k = 0; k < todo.length;) {
-        const chunk = todo.slice(k, k + RujukAccess.batchSize(8));
-        const results = await checkRefs(chunk.map((i) => items[i].text));
-        results.forEach((r, j) => applyCheck(items[chunk[j]], r));
-        k += chunk.length; done = k;
-        barFill.style.width = Math.round((done / todo.length) * 100) + '%';
-        btn.textContent = `Melengkapi… ${done}/${todo.length}`;
-      }
-    } catch (e) {
-      setError(e.message + (done ? ` (${done} dari ${todo.length} sudah dilengkapi.)` : ''), e.quota);
-    } finally {
-      busy = false;
-      btn.disabled = false; btn.textContent = 'Lengkapi semua dari database';
-      setTimeout(() => { bar.style.display = 'none'; }, 600);
-      await reformat();
-    }
-  };
 
   // ---------------------------------------------------------------------------
   // Tampilan
@@ -355,7 +328,6 @@
     // Aksi
     const acts = el('div', 'st-acts');
     const btn = (label, fn, cls) => { const b = el('button', cls || null, label); b.type = 'button'; b.onclick = () => fn(b); return b; };
-    if (!it.verified) acts.append(btn('Lengkapi dari database (1 kuota)', (b) => enrich(i, b)));
     if (it.similar) {
       acts.append(btn(`Pakai data ${it.similar.source}`, () => {
         it.csl = it.similar.csl; it.source = it.similar.source; it.verified = true; it.fixed = true; it.similar = null;

@@ -225,7 +225,7 @@ Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pust
         </div>
       </div>
       <div class="fileinfo" id="fileinfo2"></div>
-      <p class="hint">Mendukung sitasi penulis–tahun (APA, Harvard), baik dalam kurung (Sugiyono, 2019) maupun naratif Sugiyono (2019), termasuk et al./dkk., sitasi bernomor [1], [2–4], dan sitasi di catatan kaki (bila naskah diunggah sebagai .docx). File dan naskah diproses di browser Anda dan tidak dikirim ke server.</p>
+      <p class="hint">Mendukung sitasi penulis–tahun (APA, Harvard), baik dalam kurung (Sugiyono, 2019) maupun naratif Sugiyono (2019), termasuk et al./dkk., sitasi bernomor [1], [2–4], dan sitasi di catatan kaki (bila naskah diunggah sebagai .docx). Memakai 1 kuota per referensi di daftar pustaka. Naskah hanya diproses sesaat untuk pencocokan dan tidak disimpan.</p>
       <div class="row">
         <button class="primary" id="cocok">Cocokkan</button>
         <button id="clear2">Kosongkan</button>
@@ -270,7 +270,7 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
         </label>
         <label class="check"><input type="checkbox" id="st-sentence"> Judul karya ditulis <i>sentence case</i></label>
       </div>
-      <p class="hint">Perbaikan langsung dari teks yang Anda tempel, gratis dan tanpa kuota. Bila data sebuah referensi kurang lengkap (DOI, volume, halaman), klik <b>Lengkapi dari database</b> untuk mengambil data resminya; langkah ini memakai kuota Cek Referensi.</p>
+      <p class="hint">Setiap referensi dicocokkan dengan database (Crossref, OpenAlex, PubMed, DOAJ, Google Books, Open Library) agar nama penulis, volume, halaman, dan DOI lengkap, lalu diformat ke style pilihan. Memakai 1 kuota per referensi. Setelah itu, mengganti style, bahasa, atau mengedit data <b>gratis</b>.</p>
       <div class="row">
         <button class="primary" id="st-go">Perbaiki</button>
         <button id="st-clear">Kosongkan</button>
@@ -283,7 +283,6 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
     <section id="st-out" hidden>
       <div class="summary" id="st-summary"></div>
       <div class="toolbar">
-        <button id="st-enrichall">Lengkapi semua dari database</button>
         <button id="st-copyword">Salin semua untuk Word</button>
         <button id="st-copytext">Salin teks biasa</button>
         <button id="st-rtf">Unduh .rtf</button>
@@ -575,7 +574,7 @@ RujukAccess.init(document.getElementById('access'));
   function updateCount() {
     const { refsText, autoSplit } = sources();
     const n = CiteCheck.splitRefs(refsText).length;
-    $('count2').textContent = n ? `${n} referensi terdeteksi${autoSplit ? ' (dari naskah)' : ''}` : '';
+    $('count2').textContent = n ? `${n} referensi terdeteksi${autoSplit ? ' (dari naskah)' : ''} · memakai ${n} kuota` : '';
   }
   naskah.addEventListener('input', () => {
     if (!naskah.value.trim()) { docNotes = []; $('fileinfo2').textContent = ''; }
@@ -603,9 +602,26 @@ RujukAccess.init(document.getElementById('access'));
       err.textContent = 'Daftar pustaka tidak ditemukan. Tempel di kotak kanan, atau pastikan naskah memuat judul "Daftar Pustaka" atau "References" di baris tersendiri.';
       return;
     }
-    last = CiteCheck.compare(body, refsText, { notes: docNotes });
-    last.refsText = refsText;
-    render(last);
+    const btn = $('cocok');
+    btn.disabled = true; btn.textContent = 'Mencocokkan…';
+    fetch('/api/citecheck', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...RujukAccess.headers() },
+      body: JSON.stringify({ manuscript: body, references: refsText, notes: docNotes }),
+    }).then(async (res) => {
+      const d = await res.json().catch(() => ({}));
+      if (d.access) RujukAccess.update(d.access);
+      if (!res.ok) {
+        err.replaceChildren(d.error || 'Server tidak merespons dengan benar.');
+        if (res.status === 402) { const a = el('a', null, 'Lihat paket dan harga'); a.href = '/harga'; err.append(' ', a); }
+        return;
+      }
+      last = d.result;
+      last.refsText = refsText;
+      last.charged = d.charged;
+      render(last);
+    }).catch(() => { err.textContent = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.'; })
+      .finally(() => { btn.disabled = false; btn.textContent = 'Cocokkan'; });
   };
 
   function stat(n, label) {

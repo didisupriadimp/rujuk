@@ -148,7 +148,7 @@ Hasil yang ditampilkan:
 - **Ada di daftar pustaka, tidak disitasi di naskah.**
 - **Cocok, tetapi perlu diperhatikan**: huruf tahun tidak konsisten (2017a vs 2017), sitasi satu nama untuk referensi dua penulis, atau "et al./dkk." untuk referensi dengan dua penulis atau kurang.
 
-Pencocokan dilakukan di browser pengguna; isi naskah tidak dikirim ke server. Pencocokan memakai nama belakang penulis pertama dan tahun, jadi hasil untuk nama yang sangat umum atau nama lembaga tetap perlu dicek sekilas.
+Memakai 1 kuota per referensi di daftar pustaka. Naskah dikirim ke server hanya untuk dicocokkan saat itu juga, lalu dibuang (tidak disimpan). Pencocokan memakai nama belakang penulis pertama dan tahun, jadi hasil untuk nama yang sangat umum atau nama lembaga tetap perlu dicek sekilas.
 
 ## Fitur Perbaiki Style
 
@@ -157,7 +157,8 @@ Tab **Perbaiki Style** merapikan daftar pustaka ke style yang dipilih: **APA 7th
 Cara pakai:
 1. Tempel daftar pustaka (atau ambil dari file .docx / dari tab Cek Referensi).
 2. Pilih style, bahasa istilah (Inggris: *et al., and, pp.* — Indonesia: *dkk., dan, hlm.*), dan apakah judul ditulis *sentence case* (bawaan menyala untuk APA).
-3. Klik **Perbaiki**. Proses ini **gratis dan tidak memakai kuota**, karena dibaca langsung dari teks.
+3. Klik **Perbaiki**. Setiap referensi dicocokkan dengan database agar datanya lengkap (nama semua penulis, volume, halaman, DOI), lalu diformat. Memakai **1 kuota per referensi**.
+4. Setelah itu, **mengganti style, bahasa istilah, sentence case, atau mengedit data gratis**, tanpa kuota tambahan.
 
 Hasil ditampilkan per referensi dalam dua kolom (**Asli** dan **Hasil**) dengan label:
 - **Dari teks Anda**: data dibaca dari tulisan pengguna. Periksa bila ada catatan kekurangan (DOI, volume, halaman, penerbit, penulis "et al.").
@@ -165,13 +166,12 @@ Hasil ditampilkan per referensi dalam dua kolom (**Asli** dan **Hasil**) dengan 
 - **Diedit manual**: data diubah lewat tombol Edit.
 
 Tombol per referensi:
-- **Lengkapi dari database (1 kuota)**: mencari data resmi (nama semua penulis, volume, halaman, DOI). Bisa juga sekaligus dengan **Lengkapi semua dari database**.
 - **Edit**: formulir untuk memperbaiki jenis karya, penulis, judul, jurnal, volume, halaman, penerbit, DOI, dan lain-lain.
 - **Tandai beres** dan **Salin**.
 
 Filter: *Semua*, *Perlu ditinjau*, *Sudah diperbaiki*, *Dari awal sesuai*.
 
-Ekspor: **Salin semua untuk Word** (miring, hanging indent, Times New Roman 12, spasi ganda), **Salin teks biasa**, atau **Unduh .rtf** (dibuka langsung di Word). Referensi yang sudah diperiksa di tab Cek Referensi bisa dikirim dengan tombol **Perbaiki style daftar pustaka ini** tanpa memakai kuota lagi. Mengganti style setelah diperbaiki juga gratis.
+Ekspor: **Salin semua untuk Word** (miring, hanging indent, Times New Roman 12, spasi ganda), **Salin teks biasa**, atau **Unduh .rtf** (dibuka langsung di Word). Tombol **Perbaiki style daftar pustaka ini** di tab Cek Referensi memindahkan daftar pustaka ke tab Perbaiki Style.
 
 Mesin format memakai citeproc-js dan file style resmi Citation Style Language (folder `styles/`), yang juga dipakai Zotero dan Mendeley.
 
@@ -200,6 +200,19 @@ Arti status:
 | **ISBN tidak cocok** | ISBN terdaftar, tetapi untuk buku lain. |
 | **Tidak ditemukan** | Tidak ada kecocokan. Belum tentu fiktif, karena buku, prosiding, dan sebagian jurnal nasional belum tentu terindeks. |
 | **Gagal diperiksa** | Layanan Crossref/OpenAlex sedang sibuk atau tidak dapat dihubungi. Coba lagi. |
+
+## Aturan kuota
+
+Satu kuota dipakai bersama untuk semua fitur, 1 referensi = 1 kuota:
+
+| Fitur | Pemakaian kuota |
+|---|---|
+| Cek Referensi | 1 per referensi yang diperiksa |
+| Cocokkan Sitasi | 1 per referensi di daftar pustaka naskah |
+| Perbaiki Style | 1 per referensi yang diperbaiki |
+| Ganti style / bahasa / edit data setelah diperbaiki | gratis |
+
+Referensi yang gagal diperiksa karena gangguan layanan tidak memotong kuota. Pengunjung tanpa kode mendapat kuota gratis harian (bawaan 10 referensi) yang berlaku untuk semua fitur.
 
 ## Batasan bawaan
 

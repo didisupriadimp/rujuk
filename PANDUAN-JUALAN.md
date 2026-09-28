@@ -7,9 +7,9 @@ Panduan ini menyiapkan Rujuk untuk dijual: pembeli membayar di Lynk.id, kode aks
 1. Pembeli klik **Beli** di halaman `https://rujuk.id/harga`, lalu diarahkan ke produk di Lynk.id.
 2. Setelah pembayaran berhasil, Lynk mengirim **webhook** ke server Rujuk.
 3. Server membaca judul produk untuk menentukan paketnya, membuat kode seperti `RJK-7F3K-92QD-XM4P`, menyimpannya di database, dan mengirim email berisi kode.
-4. Pembeli memasukkan kode di aplikasi. Setiap referensi yang diperiksa memotong kuota. Masa berlaku mulai dihitung sejak kode pertama kali dipakai.
+4. Pembeli memasukkan kode di aplikasi. Kuota dipakai bersama untuk Cek Referensi, Cocokkan Sitasi, dan Perbaiki Style (1 referensi = 1 kuota); mengganti style setelah diperbaiki gratis. Masa berlaku mulai dihitung sejak kode pertama kali dipakai.
 
-Tanpa kode, pengunjung mendapat **percobaan gratis** (bawaan 10 referensi per hari per alamat IP) untuk Cek Referensi. **Cocokkan Sitasi selalu gratis.**
+Tanpa kode, pengunjung mendapat **percobaan gratis** (bawaan 10 referensi per hari per alamat IP) yang berlaku untuk semua fitur.
 
 ---
 

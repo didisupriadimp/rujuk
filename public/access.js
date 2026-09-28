@@ -111,7 +111,7 @@
       line.append(acts);
     } else {
       txt.append('Mode percobaan gratis');
-      if (trial) txt.append(' · Cek Referensi: sisa ', el('b', null, `${trial.remaining} dari ${trial.per_day}`), ' referensi hari ini · Cocokkan Sitasi gratis tanpa batas');
+      if (trial) txt.append(' · kuota gratis hari ini: ', el('b', null, `${trial.remaining} dari ${trial.per_day}`), ' referensi (untuk semua fitur)');
       const acts = el('span', 'access-acts');
       acts.append(action('Masukkan kode akses', () => { editing = true; render(); }, 'strong'));
       const a = el('a', 'linkbtn', 'Lihat paket'); a.href = '/harga';
