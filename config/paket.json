@@ -1,7 +1,7 @@
 {
   "_catatan": "Ubah harga, kuota, masa berlaku, dan link Lynk di file ini. 'cocok' = kata utuh di judul produk Lynk yang menandai paket ini (huruf besar/kecil tidak berpengaruh). Kode produk di link Lynk juga dicocokkan otomatis.",
   "percobaan_gratis_per_hari": 10,
-  "kontak_wa": "",
+  "kontak_wa": "+6282342747379",
   "paket": [
     {
       "id": "basic",
@@ -58,5 +58,6 @@
         "Berlaku 30 hari sejak pertama dipakai"
       ]
     }
-  ]
+  ],
+  "kontak_email": "didisupriadi.mp@gmail.com"
 }

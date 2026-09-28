@@ -4,17 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<meta name="theme-color" content="#0f1f3a">
 <title>Admin — Rujuk</title>
 <style>
   :root {
-    --bg: #f6f4ef; --panel: #ffffff; --ink: #1d2320; --muted: #5d6762; --line: #e3dfd6;
-    --brand: #1f5c4a; --brand-ink: #ffffff; --brand-soft: #e4efe9;
+    --bg: #f4f7f8; --panel: #ffffff; --ink: #0f1f3a; --muted: #56657a; --line: #dde5e8;
+    --brand: #0a7c78; --brand-ink: #ffffff; --brand-soft: #dff4f2;
     --ok: #1d7a4f; --ok-bg: #e3f3ea; --warn: #9a6200; --warn-bg: #fcf1dc; --bad: #b3261e; --bad-bg: #fbe5e3;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #151917; --panel: #1d2320; --ink: #e8ece9; --muted: #9aa6a0; --line: #2e3632;
-      --brand: #5fbf9a; --brand-ink: #0f1a15; --brand-soft: #22332b;
+      --bg: #0e1522; --panel: #152033; --ink: #e8eef6; --muted: #9aa8bb; --line: #26344a;
+      --brand: #3fd0c5; --brand-ink: #062322; --brand-soft: #14302f;
       --ok: #6fd3a0; --ok-bg: #1d3328; --warn: #f0b95a; --warn-bg: #3a2f1a; --bad: #f28b82; --bad-bg: #3d2220;
     }
   }
@@ -62,7 +67,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="row" style="justify-content:space-between"><h1>Admin Rujuk</h1><button id="logout" hidden>Keluar</button></div>
+  <div class="row" style="justify-content:space-between"><h1 style="display:flex;align-items:center;gap:10px"><img src="/img/logo-mark.png" alt="" width="36" height="36" style="background:#fff;border-radius:9px;padding:3px">Admin Rujuk</h1><button id="logout" hidden>Keluar</button></div>
 
   <section id="login" class="panel">
     <form id="loginform" class="row">

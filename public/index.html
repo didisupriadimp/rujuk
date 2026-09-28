@@ -5,19 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rujuk — Pemeriksa Daftar Pustaka</title>
 <meta name="description" content="Periksa apakah referensi di daftar pustaka benar-benar ada, DOI-nya benar, dan datanya cocok.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f5c4a'/%3E%3Cpath d='M10 16.5l4 4 8-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<meta name="theme-color" content="#0f1f3a">
 <style>
   :root {
-    --bg: #f6f4ef; --panel: #ffffff; --ink: #1d2320; --muted: #5d6762; --line: #e3dfd6;
-    --brand: #1f5c4a; --brand-ink: #ffffff; --brand-soft: #e4efe9;
+    --bg: #f4f7f8; --panel: #ffffff; --ink: #0f1f3a; --muted: #56657a; --line: #dde5e8;
+    --brand: #0a7c78; --brand-ink: #ffffff; --brand-soft: #dff4f2;
     --ok: #1d7a4f; --ok-bg: #e3f3ea; --warn: #9a6200; --warn-bg: #fcf1dc;
     --bad: #b3261e; --bad-bg: #fbe5e3; --gray: #5f6b66; --gray-bg: #eceae4;
     --radius: 12px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #151917; --panel: #1d2320; --ink: #e8ece9; --muted: #9aa6a0; --line: #2e3632;
-      --brand: #5fbf9a; --brand-ink: #0f1a15; --brand-soft: #22332b;
+      --bg: #0e1522; --panel: #152033; --ink: #e8eef6; --muted: #9aa8bb; --line: #26344a;
+      --brand: #3fd0c5; --brand-ink: #062322; --brand-soft: #14302f;
       --ok: #6fd3a0; --ok-bg: #1d3328; --warn: #f0b95a; --warn-bg: #3a2f1a;
       --bad: #f28b82; --bad-bg: #3d2220; --gray: #a9b3ae; --gray-bg: #2a302d;
     }
@@ -27,8 +31,9 @@
     font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   .wrap { max-width: 920px; margin: 0 auto; padding: 32px 16px 64px; }
   header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-  .logo { width: 36px; height: 36px; border-radius: 9px; background: var(--brand); display: grid; place-items: center; }
-  .logo svg { width: 20px; height: 20px; }
+  .logo { width: 40px; height: 40px; border-radius: 10px; background: #fff; padding: 3px; box-shadow: 0 0 0 1px var(--line); display: block; }
+  .brandname { display: grid; line-height: 1.1; }
+  .brandname small { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: .01em; }
   h1 { font-size: 26px; margin: 0; letter-spacing: -0.01em; }
   .tagline { color: var(--muted); margin: 4px 0 24px; }
   .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
@@ -147,6 +152,10 @@
   .chip.bad { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
   .note { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
   .error { color: var(--bad); margin-top: 12px; }
+  .contact { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-top: 32px; font-size: 14px; color: var(--muted); }
+  .contact b { color: var(--ink); }
+  .contact a { color: var(--brand); font-weight: 600; text-decoration: none; }
+  .contact a:hover { text-decoration: underline; }
   footer { color: var(--muted); font-size: 13px; margin-top: 40px; }
   @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
@@ -159,9 +168,9 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="logo"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <h1>Rujuk</h1>
-    <nav><a href="/harga">Harga</a></nav>
+    <img class="logo" src="/img/logo-mark.png" alt="" width="40" height="40">
+    <div class="brandname"><h1>Rujuk</h1><small>Reference &amp; Citation Checker</small></div>
+    <nav><a href="/harga">Harga</a><a href="#kontak">Kontak</a></nav>
   </header>
   <p class="tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, cocok dengan sitasi di naskah, dan sesuai style APA, IEEE, atau lainnya.</p>
 
@@ -293,6 +302,12 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
         <div id="st-list" class="st-list"></div>
       </details>
     </section>
+  </div>
+
+  <div class="contact" id="kontak">
+    <b>Butuh bantuan?</b>
+    <a href="mailto:didisupriadi.mp@gmail.com">✉ didisupriadi.mp@gmail.com</a>
+    <a href="https://wa.me/6282342747379" target="_blank" rel="noopener">WhatsApp +62 823-4274-7379</a>
   </div>
 
   <footer>
