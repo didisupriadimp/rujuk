@@ -84,6 +84,43 @@ const MIME = {
 
 const PAGES = { '/': '/index.html', '/harga': '/harga.html', '/admin': '/admin.html' };
 
+// ---- Untuk mesin pencari (Google Search Console) ----
+const SITE_URL = (process.env.PUBLIC_URL || 'https://rujuk.id').replace(/\/$/, '');
+const SITE_HOST = new URL(SITE_URL).host;
+const STARTED = new Date().toISOString().slice(0, 10);
+
+const ROBOTS_TXT = `User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: ${SITE_URL}/sitemap.xml
+`;
+
+function sitemapXml() {
+  const pages = [['/', '1.0', 'weekly'], ['/harga', '0.8', 'monthly']];
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${pages.map(([u, pr, cf]) => `  <url><loc>${SITE_URL}${u}</loc><lastmod>${STARTED}</lastmod><changefreq>${cf}</changefreq><priority>${pr}</priority></url>`).join('\n')}
+</urlset>
+`;
+}
+
+// Alamat lain (www.rujuk.id, rujuk.onrender.com) dialihkan permanen ke alamat utama,
+// supaya Google hanya mengindeks satu alamat. Hanya aktif bila PUBLIC_URL diisi.
+function canonicalRedirect(req, res, p) {
+  if (!process.env.PUBLIC_URL) return false;
+  if (!['GET', 'HEAD'].includes(req.method) || p === '/health' || p.startsWith('/api/')) return false;
+  const host = String(req.headers.host || '').toLowerCase();
+  if (!host || host === SITE_HOST) return false;
+  if (host === 'www.' + SITE_HOST || host.endsWith('.onrender.com')) {
+    res.writeHead(301, { Location: SITE_URL + req.url, 'Cache-Control': 'public, max-age=3600' });
+    res.end();
+    return true;
+  }
+  return false;
+}
+
 function serveStatic(req, res) {
   let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   p = PAGES[p] || p;
@@ -436,6 +473,9 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   const p = url.pathname;
   if (req.method === 'GET' && p === '/health') return send(res, 200, { ok: true });
+  if (canonicalRedirect(req, res, p)) return;
+  if ((req.method === 'GET' || req.method === 'HEAD') && p === '/robots.txt') return send(res, 200, ROBOTS_TXT, 'text/plain; charset=utf-8');
+  if ((req.method === 'GET' || req.method === 'HEAD') && p === '/sitemap.xml') return send(res, 200, sitemapXml(), 'application/xml; charset=utf-8');
   if (req.method === 'GET' && p === '/api/info') {
     const j = journals.info();
     return send(res, 200, { sjr: { loaded: j.loaded, year: j.year, count: j.count } });
