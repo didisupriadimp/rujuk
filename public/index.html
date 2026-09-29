@@ -3,8 +3,58 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rujuk — Pemeriksa Daftar Pustaka</title>
-<meta name="description" content="Periksa apakah referensi di daftar pustaka benar-benar ada, DOI-nya benar, dan datanya cocok.">
+<title>Rujuk — Cek Daftar Pustaka, DOI, Sitasi & Style APA Online</title>
+<meta name="description" content="Cek daftar pustaka skripsi, tesis, disertasi, dan artikel jurnal: pastikan referensi benar-benar ada, DOI dan ISBN benar, sitasi di naskah cocok dengan daftar pustaka, lalu rapikan ke APA 7, IEEE, Harvard, Chicago, MLA, atau Vancouver.">
+<link rel="canonical" href="https://rujuk.id/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rujuk">
+<meta property="og:locale" content="id_ID">
+<meta property="og:url" content="https://rujuk.id/">
+<meta property="og:title" content="Rujuk — Cek Daftar Pustaka, DOI, Sitasi & Style APA">
+<meta property="og:description" content="Pastikan referensi skripsi, tesis, dan jurnal Anda benar-benar ada, cocok dengan sitasi di naskah, dan sesuai style APA, IEEE, dan lainnya.">
+<meta property="og:image" content="https://rujuk.id/img/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rujuk — Cek Daftar Pustaka, DOI, Sitasi & Style APA">
+<meta name="twitter:description" content="Cek referensi, cocokkan sitasi, dan rapikan daftar pustaka ke APA 7, IEEE, Harvard, dan lainnya.">
+<meta name="twitter:image" content="https://rujuk.id/img/og-image.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://rujuk.id/#org",
+      "name": "Rujuk",
+      "url": "https://rujuk.id/",
+      "logo": "https://rujuk.id/img/icon-512.png",
+      "email": "admin@rujuk.id",
+      "contactPoint": { "@type": "ContactPoint", "contactType": "customer support", "email": "admin@rujuk.id", "telephone": "+62-823-4274-7379", "availableLanguage": ["id", "en"] }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://rujuk.id/#website",
+      "name": "Rujuk",
+      "alternateName": "Rujuk – Reference & Citation Checker",
+      "url": "https://rujuk.id/",
+      "inLanguage": "id-ID",
+      "publisher": { "@id": "https://rujuk.id/#org" }
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Rujuk – Reference & Citation Checker",
+      "url": "https://rujuk.id/",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "inLanguage": "id-ID",
+      "description": "Cek keberadaan referensi, DOI, dan ISBN; cocokkan sitasi di naskah dengan daftar pustaka; dan ubah format daftar pustaka ke APA 7, IEEE, Harvard, Chicago, MLA, atau Vancouver.",
+      "publisher": { "@id": "https://rujuk.id/#org" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "IDR", "description": "Coba gratis 10 referensi per hari; paket berbayar di rujuk.id/harga" }
+    }
+  ]
+}
+</script>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/img/icon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png">
@@ -157,6 +207,14 @@
   .contact a { color: var(--brand); font-weight: 600; text-decoration: none; }
   .contact a:hover { text-decoration: underline; }
   footer { color: var(--muted); font-size: 13px; margin-top: 40px; }
+  .about { margin-top: 40px; }
+  .about h2 { font-size: 20px; margin: 0 0 8px; color: var(--ink); }
+  .about > p { color: var(--muted); margin: 0 0 14px; }
+  .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .about-grid > div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .about-grid h3 { font-size: 15px; margin: 0 0 6px; color: var(--ink); }
+  .about-grid p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.5; }
+  .about .note a { color: var(--brand); }
   @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
     .card-top { flex-wrap: wrap; }
@@ -303,6 +361,17 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
       </details>
     </section>
   </div>
+
+  <section class="about" id="tentang">
+    <h2>Cek daftar pustaka skripsi, tesis, disertasi, dan artikel jurnal</h2>
+    <p>Rujuk membantu mahasiswa, dosen, dan penulis jurnal memastikan daftar pustaka rapi dan dapat dipertanggungjawabkan sebelum naskah diserahkan ke pembimbing, penguji, atau redaksi jurnal.</p>
+    <div class="about-grid">
+      <div><h3>Cek Referensi</h3><p>Memastikan setiap referensi benar-benar ada, DOI dan ISBN-nya benar, serta judul, tahun, dan penulisnya cocok. Dilengkapi label indeks Scopus (Q1–Q4) dan DOAJ untuk jurnal.</p></div>
+      <div><h3>Cocokkan Sitasi</h3><p>Menemukan penulis yang dikutip di naskah tetapi tidak ada di daftar pustaka, dan sebaliknya. Bisa langsung mengunggah file Word (.docx).</p></div>
+      <div><h3>Perbaiki Style</h3><p>Merapikan daftar pustaka ke APA 7, IEEE, Harvard, Chicago, MLA, atau Vancouver, lalu menyalinnya ke Word dengan format miring yang tetap terjaga.</p></div>
+    </div>
+    <p class="note">Coba gratis 10 referensi per hari tanpa daftar. Untuk pemakaian lebih banyak, lihat <a href="/harga">paket harga</a>.</p>
+  </section>
 
   <div class="contact" id="kontak">
     <b>Butuh bantuan?</b>
