@@ -9,6 +9,7 @@ const path = require('path');
 const crypto = require('crypto');
 const querystring = require('querystring');
 const { checkOne } = require('./lib/check');
+const analytics = require('./lib/analytics');
 const journals = require('./lib/journals');
 const access = require('./lib/access');
 const { parseLynk } = require('./lib/lynk');
@@ -123,12 +124,14 @@ function canonicalRedirect(req, res, p) {
 
 function serveStatic(req, res) {
   let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  const pagePath = PAGES[p] && p !== '/admin' ? p : null; // halaman publik yang dihitung di statistik
   p = PAGES[p] || p;
   const file = path.normalize(path.join(PUBLIC_DIR, p));
   if (!file.startsWith(PUBLIC_DIR + path.sep)) return send(res, 403, { error: 'Dilarang.' });
   fs.readFile(file, (err, buf) => {
     if (err) return send(res, 404, 'Halaman tidak ditemukan.', 'text/plain; charset=utf-8');
     const extra = p === '/admin.html' ? { 'X-Robots-Tag': 'noindex', 'Cache-Control': 'no-store' } : {};
+    if (pagePath) analytics.pageView(req, pagePath, clientIp(req), SITE_HOST.replace(/^www\./, ''));
     send(res, 200, buf, MIME[path.extname(file)] || 'application/octet-stream', extra);
   });
 }
@@ -237,7 +240,9 @@ async function handleCheck(req, res) {
   const charge = await takeCharge(req, res, n);
   if (!charge) return;
   const results = await Promise.all(clean.map((r) => checkOne(r)));
-  await refundCharge(charge, results.filter((r) => r.status === 'galat').length);
+  const failed = results.filter((r) => r.status === 'galat').length;
+  await refundCharge(charge, failed);
+  analytics.usage(req, charge.ip || clientIp(req), body.feature === 'style' ? 'style' : 'check', n - failed, charge.mode);
   send(res, 200, { results, access: await chargeInfo(charge) });
 }
 
@@ -268,6 +273,7 @@ async function handleCiteCheck(req, res) {
     console.error('[citecheck]', e);
     return send(res, 500, { error: 'Gagal mencocokkan sitasi.' });
   }
+  analytics.usage(req, charge.ip || clientIp(req), 'cite', n, charge.mode);
   send(res, 200, { result, charged: n, access: await chargeInfo(charge) });
 }
 
@@ -452,6 +458,12 @@ async function handleAdmin(req, res, url) {
     } else return send(res, 400, { error: 'Aksi tidak dikenal.' });
     return send(res, 200, { code: adminView(out), mail });
   }
+  if (req.method === 'GET' && p === '/stats') {
+    const r = await analytics.report(url.searchParams.get('days'));
+    const price = Object.fromEntries(access.plans().map((x) => [x.id, Number(x.harga) || 0]));
+    r.sales = r.sales.map((x) => ({ ...x, revenue: (price[x.plan] || 0) * x.n }));
+    return send(res, 200, r);
+  }
   if (req.method === 'GET' && p === '/logs') {
     return send(res, 200, { logs: await store.listLogs(50) });
   }
@@ -497,6 +509,7 @@ const server = http.createServer((req, res) => {
 });
 
 store.init().then(() => {
+  analytics.start(store);
   server.listen(PORT, () => {
     console.log(`Rujuk berjalan di http://localhost:${PORT}`);
     console.log(`Penyimpanan kode akses: ${store.kind === 'postgres' ? 'PostgreSQL' : 'file lokal (isi DATABASE_URL untuk produksi)'}`);

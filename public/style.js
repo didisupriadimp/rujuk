@@ -206,7 +206,7 @@
     const res = await fetch('/api/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...RujukAccess.headers() },
-      body: JSON.stringify({ references: texts }),
+      body: JSON.stringify({ references: texts, feature: 'style' }),
     });
     const d = await res.json().catch(() => ({}));
     if (d.access) RujukAccess.update(d.access);

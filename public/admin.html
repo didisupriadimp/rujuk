@@ -63,6 +63,27 @@
   .log { border-bottom: 1px solid var(--line); padding: 10px 0; }
   .log:last-child { border-bottom: none; }
   #err { color: var(--bad); margin-top: 8px; }
+  /* ---- Statistik ---- */
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; padding: 6px 12px; font-size: 13px; background: var(--panel); }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--brand-soft); color: var(--ink); font-weight: 600; }
+  .card small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .chartbox { position: relative; margin-top: 10px; }
+  .chartbox svg { display: block; width: 100%; height: 220px; }
+  .chartbox .grid-line { stroke: var(--line); stroke-width: 1; }
+  .chartbox .axis-text { fill: var(--muted); font-size: 11px; }
+  .chartbox .bar { fill: var(--brand); pointer-events: none; }
+  .chartbox .hit { fill: transparent; cursor: default; }
+  .chartbox .hit:hover + .bar, .chartbox .bar.on { opacity: .75; }
+  .tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; line-height: 1.45; padding: 7px 10px; border-radius: 8px; white-space: nowrap; transform: translate(-50%, -100%); margin-top: -8px; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+  .tip b { font-weight: 700; }
+  .twocol { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin-top: 10px; }
+  .twocol h3 { font-size: 14px; margin: 0 0 6px; }
+  .mini-table td, .mini-table th { padding: 6px 8px; }
+  .mini-table td.num, .mini-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .meter { height: 6px; background: var(--brand-soft); border-radius: 3px; margin-top: 3px; }
+  .meter > i { display: block; height: 100%; background: var(--brand); border-radius: 3px; }
 </style>
 </head>
 <body>
@@ -80,6 +101,24 @@
   <main id="app" hidden>
     <div class="cards" id="cards"></div>
     <div id="notices"></div>
+
+    <div class="row" style="justify-content:space-between;margin-top:28px">
+      <h2 style="margin:0">Statistik pengunjung</h2>
+      <div class="row">
+        <div class="seg" id="range" role="group" aria-label="Rentang waktu">
+          <button type="button" data-d="7">7 hari</button><button type="button" data-d="30" aria-pressed="true">30 hari</button><button type="button" data-d="90">90 hari</button>
+        </div>
+        <button class="mini" id="reloadstats" type="button">Muat ulang</button>
+      </div>
+    </div>
+    <div class="cards" id="statcards" style="margin-top:10px"></div>
+    <div class="panel" style="margin-top:10px">
+      <div class="row" style="justify-content:space-between"><b style="font-size:14px">Pengunjung unik per hari</b><span class="muted" id="chartnote"></span></div>
+      <div class="chartbox" id="chart"></div>
+      <details style="margin-top:8px"><summary class="muted">Lihat tabel harian</summary><div class="tablewrap" style="margin-top:8px"><table class="mini-table"><thead><tr><th>Tanggal</th><th class="num">Pengunjung</th><th class="num">Tampilan halaman</th><th class="num">Pengguna fitur</th><th class="num">Cek Referensi</th><th class="num">Cocokkan Sitasi</th><th class="num">Perbaiki Style</th></tr></thead><tbody id="dailytable"></tbody></table></div></details>
+    </div>
+    <div class="twocol" id="stattables"></div>
+    <p class="muted">Dihitung sejak fitur statistik dipasang. Bot dan mesin pencari tidak dihitung. Pengunjung dikenali dari sidik anonim (IP + browser yang di-hash), tanpa cookie; satu orang yang berganti jaringan atau perangkat bisa terhitung lebih dari sekali.</p>
 
     <h2>Buat kode manual</h2>
     <form id="create" class="panel">
@@ -169,8 +208,167 @@
     if (!s.email) n.append(el('div', 'notice', 'Email otomatis belum aktif (RESEND_API_KEY / EMAIL_FROM). Kode tetap dibuat; kirim manual lewat tombol WA atau salin kodenya.'));
     if (s.webhook) n.append(el('div', 'muted', `URL webhook untuk Lynk: ${location.origin}/api/lynk/webhook/<LYNK_WEBHOOK_SECRET>`));
     $('c-plan').replaceChildren(...s.plans.map((p) => { const o = el('option', null, `${p.nama} (${p.kuota} ref, ${p.hari} hari)`); o.value = p.id; return o; }));
-    await Promise.all([loadCodes(), loadLogs()]);
+    await Promise.all([loadCodes(), loadLogs(), loadStats().catch((x) => { $('statcards').replaceChildren(el('div', 'notice', 'Statistik gagal dimuat: ' + x.message)); })]);
   }
+
+  // ---------------- Statistik ----------------
+  let statDays = 30;
+  let lastStats = null;
+  const nf = (n) => Number(n || 0).toLocaleString('id-ID');
+  const rp = (n) => 'Rp' + Number(n || 0).toLocaleString('id-ID');
+  const dLabel = (d, opt) => new Date(d + 'T00:00:00+07:00').toLocaleDateString('id-ID', Object.assign({ timeZone: 'Asia/Jakarta' }, opt));
+  const FEAT = { check: 'Cek Referensi', cite: 'Cocokkan Sitasi', style: 'Perbaiki Style' };
+  const DEV = { mobile: 'HP', desktop: 'Komputer', tablet: 'Tablet' };
+  const MODE = { trial: 'Coba gratis', code: 'Kode akses (berbayar)' };
+  const PAGE = { '/': 'Beranda', '/harga': 'Harga' };
+
+  $('range').onclick = (e) => {
+    const b = e.target.closest('button[data-d]');
+    if (!b) return;
+    statDays = Number(b.dataset.d);
+    for (const x of $('range').querySelectorAll('button')) x.setAttribute('aria-pressed', String(x === b));
+    loadStats().catch((x) => alert(x.message));
+  };
+  $('reloadstats').onclick = () => loadStats().catch((x) => alert(x.message));
+
+  function statCard(value, label, sub) {
+    const c = card(value, label);
+    if (sub) c.append(el('small', null, sub));
+    return c;
+  }
+
+  async function loadStats() {
+    const s = await api('GET', '/stats?days=' + statDays);
+    lastStats = s;
+    const salesN = s.sales.reduce((a, x) => a + x.n, 0);
+    const salesRp = s.sales.reduce((a, x) => a + (x.revenue || 0), 0);
+    const r = `${statDays} hari terakhir`;
+    $('statcards').replaceChildren(
+      statCard(nf(s.today.visitors), 'Pengunjung hari ini', nf(s.today.pageviews) + ' tampilan halaman'),
+      statCard(nf(s.totals.visitors), 'Pengunjung unik', r),
+      statCard(nf(s.totals.pageviews), 'Tampilan halaman', r),
+      statCard(nf(s.totals.users), 'Pengguna fitur', r),
+      statCard(nf(s.totals.refs), 'Referensi diproses', r),
+      statCard(nf(salesN), 'Penjualan Lynk', salesN ? '≈ ' + rp(salesRp) : r),
+    );
+    drawChart(s.daily);
+    const tb = $('dailytable');
+    tb.replaceChildren(...s.daily.slice().reverse().map((d) => {
+      const tr = el('tr');
+      tr.append(el('td', null, dLabel(d.day, { weekday: 'short', day: 'numeric', month: 'short' })),
+        ...[d.visitors, d.pageviews, d.users, d.check, d.cite, d.style].map((v) => el('td', 'num', nf(v))));
+      return tr;
+    }));
+    const box = $('stattables');
+    box.replaceChildren(
+      miniTable('Asal pengunjung', 'Sumber', s.referrers.map((x) => [x.name === 'langsung' ? 'Langsung / tidak diketahui' : x.name, x.n]), 'kunjungan'),
+      miniTable('Perangkat', 'Jenis', s.devices.map((x) => [DEV[x.name] || x.name, x.n]), 'pengunjung'),
+      miniTable('Halaman', 'Halaman', s.pages.map((x) => [PAGE[x.name] || x.name, x.n]), 'tampilan'),
+      featureTable(s.features),
+      miniTable('Kuota terpakai', 'Jenis', s.modes.map((x) => [MODE[x.name] || x.name, x.n]), 'referensi'),
+      salesTable(s.sales),
+    );
+  }
+
+  function miniTable(title, col, rows, unit) {
+    const wrap = el('div', 'panel');
+    wrap.append(el('h3', null, title));
+    if (!rows.length) { wrap.append(el('div', 'muted', 'Belum ada data.')); return wrap; }
+    const total = rows.reduce((a, r) => a + r[1], 0) || 1;
+    const t = el('table', 'mini-table');
+    const th = el('tr'); th.append(el('th', null, col), el('th', 'num', unit)); t.append(th);
+    for (const [name, n] of rows) {
+      const tr = el('tr');
+      const td = el('td');
+      td.append(el('div', null, name));
+      const m = el('div', 'meter'); const i = el('i'); i.style.width = Math.max(2, Math.round(n / total * 100)) + '%'; m.append(i); td.append(m);
+      tr.append(td, el('td', 'num', nf(n) + ' (' + Math.round(n / total * 100) + '%)'));
+      t.append(tr);
+    }
+    wrap.append(t);
+    return wrap;
+  }
+
+  function featureTable(f) {
+    const wrap = el('div', 'panel');
+    wrap.append(el('h3', null, 'Pemakaian fitur'));
+    const t = el('table', 'mini-table');
+    const th = el('tr'); th.append(el('th', null, 'Fitur'), el('th', 'num', 'referensi'), el('th', 'num', 'pengguna')); t.append(th);
+    for (const x of f) { const tr = el('tr'); tr.append(el('td', null, FEAT[x.name] || x.name), el('td', 'num', nf(x.refs)), el('td', 'num', nf(x.users))); t.append(tr); }
+    wrap.append(t);
+    return wrap;
+  }
+
+  function salesTable(sales) {
+    const wrap = el('div', 'panel');
+    wrap.append(el('h3', null, 'Penjualan lewat Lynk'));
+    if (!sales.length) { wrap.append(el('div', 'muted', 'Belum ada penjualan pada rentang ini.')); return wrap; }
+    const t = el('table', 'mini-table');
+    const th = el('tr'); th.append(el('th', null, 'Paket'), el('th', 'num', 'terjual'), el('th', 'num', 'perkiraan')); t.append(th);
+    for (const x of sales) { const tr = el('tr'); tr.append(el('td', null, x.plan_name || x.plan), el('td', 'num', nf(x.n)), el('td', 'num', rp(x.revenue))); t.append(tr); }
+    wrap.append(t);
+    wrap.append(el('div', 'muted', 'Perkiraan = jumlah kode × harga paket saat ini (sebelum potongan Lynk).'));
+    return wrap;
+  }
+
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const sv = (tag, attrs) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+
+  function niceMax(v) {
+    if (v <= 5) return 5;
+    const p = Math.pow(10, Math.floor(Math.log10(v)));
+    for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= v) return m * p;
+    return 10 * p;
+  }
+
+  function drawChart(daily) {
+    const box = $('chart');
+    box.replaceChildren();
+    const W = Math.max(300, box.clientWidth || 600), H = 220;
+    const L = 34, R = 6, T = 10, B = 24;
+    const max = niceMax(Math.max(0, ...daily.map((d) => d.visitors)));
+    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Grafik pengunjung unik per hari' });
+    const y = (v) => T + (H - T - B) * (1 - v / max);
+    for (let i = 0; i <= 4; i++) {
+      const v = max * i / 4, yy = Math.round(y(v)) + 0.5;
+      svg.append(sv('line', { x1: L, x2: W - R, y1: yy, y2: yy, class: 'grid-line' }));
+      const t = sv('text', { x: L - 6, y: yy + 4, 'text-anchor': 'end', class: 'axis-text' }); t.textContent = nf(v); svg.append(t);
+    }
+    const n = daily.length, slot = (W - L - R) / n, gap = n > 60 ? 1 : 2, bw = Math.max(1, slot - gap);
+    const every = Math.ceil(n / Math.max(2, Math.floor((W - L - R) / 64)));
+    const tip = el('div', 'tip'); tip.hidden = true;
+    daily.forEach((d, i) => {
+      const x = L + i * slot + gap / 2;
+      const top = y(d.visitors), base = y(0), h = base - top, r = Math.min(4, bw / 2, h);
+      const path = h > 0
+        ? `M${x},${base} V${top + r} Q${x},${top} ${x + r},${top} H${x + bw - r} Q${x + bw},${top} ${x + bw},${top + r} V${base} Z`
+        : '';
+      const bar = sv('path', { d: path, class: 'bar' });
+      const hit = sv('rect', { x: L + i * slot, y: T, width: slot, height: H - T - B, class: 'hit' });
+      hit.addEventListener('mouseenter', () => {
+        bar.classList.add('on');
+        tip.replaceChildren();
+        const b = el('b', null, dLabel(d.day, { weekday: 'long', day: 'numeric', month: 'long' }));
+        tip.append(b, el('div', null, `${nf(d.visitors)} pengunjung · ${nf(d.pageviews)} tampilan`), el('div', null, `${nf(d.check + d.cite + d.style)} referensi diproses`));
+        tip.style.left = Math.min(Math.max((x + bw / 2) / W * 100, 12), 88) + '%';
+        tip.style.top = (top / H * 220) + 'px';
+        tip.hidden = false;
+      });
+      hit.addEventListener('mouseleave', () => { bar.classList.remove('on'); tip.hidden = true; });
+      svg.append(hit, bar);
+      if ((n - 1 - i) % every === 0) {
+        const cx = x + bw / 2, nearEnd = cx > W - R - 24;
+        const t = sv('text', { x: nearEnd ? W - R : cx, y: H - 6, 'text-anchor': nearEnd ? 'end' : 'middle', class: 'axis-text' });
+        t.textContent = dLabel(d.day, { day: 'numeric', month: 'short' });
+        svg.append(t);
+      }
+    });
+    box.append(svg, tip);
+    const total = daily.reduce((a, d) => a + d.visitors, 0);
+    $('chartnote').textContent = total ? '' : 'Belum ada kunjungan pada rentang ini.';
+  }
+  let rt = null;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (lastStats) drawChart(lastStats.daily); }, 150); });
 
   async function loadCodes() {
     const d = await api('GET', '/codes?q=' + encodeURIComponent($('q').value.trim()));
