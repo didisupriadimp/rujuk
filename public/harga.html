@@ -3,9 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--seo-->
 <title>Harga Paket — Rujuk, Cek Daftar Pustaka Skripsi, Tesis & Disertasi</title>
 <meta name="description" content="Paket Rujuk untuk memeriksa daftar pustaka skripsi, tesis, disertasi, dan naskah jurnal: cek referensi dan DOI, cocokkan sitasi, dan rapikan ke APA 7 atau style lain. Bayar sekali, kode akses dikirim ke email.">
 <link rel="canonical" href="https://rujuk.id/harga">
+<link rel="alternate" hreflang="id" href="https://rujuk.id/harga">
+<link rel="alternate" hreflang="en" href="https://rujuk.id/en/harga">
+<link rel="alternate" hreflang="x-default" href="https://rujuk.id/harga">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Rujuk">
 <meta property="og:locale" content="id_ID">
@@ -15,6 +19,8 @@
 <meta property="og:image" content="https://rujuk.id/img/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://rujuk.id/img/og-image.png">
+<!--/seo-->
+<script src="/i18n.js"></script>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/img/icon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png">
@@ -40,9 +46,11 @@
   .brandname { display: grid; line-height: 1.1; }
   .brandname small { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: .01em; }
   header b { font-size: 24px; letter-spacing: -0.01em; }
-  header nav { margin-left: auto; display: flex; gap: 16px; font-size: 15px; }
+  header nav { margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px 16px; font-size: 15px; }
   header nav a { color: var(--ink); text-decoration: none; font-weight: 600; }
   header nav a[aria-current] { color: var(--brand); }
+  header nav a.langsw { border: 1px solid var(--line); border-radius: 999px; padding: 0 10px; font-weight: 600; font-size: 13px; line-height: 24px; color: var(--muted); }
+  header nav a.langsw:hover { color: var(--brand); border-color: var(--brand); }
   h1 { font-size: clamp(26px, 4vw, 34px); letter-spacing: -0.02em; margin: 0 0 8px; line-height: 1.2; }
   .lead { color: var(--muted); margin: 0 0 28px; max-width: 640px; }
   .free { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 28px; }
@@ -88,71 +96,73 @@
       <img class="logo" src="/img/logo-mark.png" alt="" width="40" height="40">
       <span class="brandname"><b>Rujuk</b><small>Reference &amp; Citation Checker</small></span>
     </a>
-    <nav><a href="/">Aplikasi</a><a href="/harga" aria-current="page">Harga</a><a href="#kontak">Kontak</a></nav>
+    <nav><a href="/" data-i18n="nav.app">Aplikasi</a><a href="/harga" aria-current="page" data-i18n="nav.pricing">Harga</a><a href="#kontak" data-i18n="nav.contact">Kontak</a><a href="/en/harga" class="langsw" data-lang-switch hreflang="en" lang="en">English</a></nav>
   </header>
 
-  <h1>Pilih paket sesuai naskah Anda</h1>
-  <p class="lead">Bayar sekali, tanpa langganan otomatis. Kode akses dikirim ke email Anda begitu pembayaran berhasil, dan masa berlakunya baru mulai dihitung saat pertama dipakai.</p>
+  <h1 data-i18n="price.h1">Pilih paket sesuai naskah Anda</h1>
+  <p class="lead" data-i18n="price.lead">Bayar sekali, tanpa langganan otomatis. Kode akses dikirim ke email Anda begitu pembayaran berhasil, dan masa berlakunya baru mulai dihitung saat pertama dipakai.</p>
   <div class="free" id="free">
-    <span>Satu kuota untuk semua fitur: Cek Referensi, Cocokkan Sitasi, Perbaiki Style</span>
-    <span>Ganti style (APA, IEEE, Harvard, dll.): gratis</span>
-    <span id="trialtag">Coba gratis setiap hari</span>
+    <span data-i18n="price.free1">Satu kuota untuk semua fitur: Cek Referensi, Cocokkan Sitasi, Perbaiki Style</span>
+    <span data-i18n="price.free2">Ganti style (APA, IEEE, Harvard, dll.): gratis</span>
+    <span id="trialtag" data-i18n="price.trial">Coba gratis setiap hari</span>
   </div>
 
-  <div class="plans" id="plans"><p class="lead">Memuat paket…</p></div>
+  <div class="plans" id="plans"><p class="lead" data-i18n="price.loading">Memuat paket…</p></div>
 
   <div class="inst" id="inst">
-    <p><b>Kampus, prodi, perpustakaan, atau pengelola jurnal?</b><br>Tersedia lisensi tahunan dengan kuota besar dan kode untuk banyak pengguna.</p>
-    <a class="btn" id="instbtn" href="/" hidden>Hubungi kami</a>
+    <p data-i18n="price.instText"><b>Kampus, prodi, perpustakaan, atau pengelola jurnal?</b><br>Tersedia lisensi tahunan dengan kuota besar dan kode untuk banyak pengguna.</p>
+    <a class="btn" id="instbtn" href="/" hidden data-i18n="price.instBtn">Hubungi kami</a>
   </div>
 
-  <h2 class="sec">Cara kerjanya</h2>
+  <h2 class="sec" data-i18n="price.howH">Cara kerjanya</h2>
   <div class="steps">
-    <div class="step"><b>Pilih dan bayar</b><span>Klik "Beli" pada paket, lalu bayar di halaman Lynk dengan QRIS, e-wallet, atau transfer bank.</span></div>
-    <div class="step"><b>Terima kode akses</b><span>Kode seperti RJK-XXXX-XXXX-XXXX dikirim ke email yang Anda isi saat membayar, biasanya dalam beberapa menit.</span></div>
-    <div class="step"><b>Masukkan kode</b><span>Di aplikasi Rujuk, klik "Masukkan kode akses", tempel kodenya, lalu periksa daftar pustaka Anda.</span></div>
+    <div class="step"><b data-i18n="price.s1b">Pilih dan bayar</b><span data-i18n="price.s1">Klik "Beli" pada paket, lalu bayar di halaman Lynk dengan QRIS, e-wallet, atau transfer bank.</span></div>
+    <div class="step"><b data-i18n="price.s2b">Terima kode akses</b><span data-i18n="price.s2">Kode seperti RJK-XXXX-XXXX-XXXX dikirim ke email yang Anda isi saat membayar, biasanya dalam beberapa menit.</span></div>
+    <div class="step"><b data-i18n="price.s3b">Masukkan kode</b><span data-i18n="price.s3">Di aplikasi Rujuk, klik "Masukkan kode akses", tempel kodenya, lalu periksa daftar pustaka Anda.</span></div>
   </div>
 
-  <h2 class="sec">Pertanyaan umum</h2>
-  <details><summary>Kapan masa berlaku dihitung?</summary><p>Sejak kode pertama kali dipakai untuk memeriksa referensi, bukan sejak dibeli. Jadi aman membeli lebih awal.</p></details>
-  <details><summary>Bagaimana kuota dihitung?</summary><p>Satu kuota dipakai bersama untuk semua fitur, dengan hitungan 1 referensi = 1 kuota:</p><ul style="color:var(--muted);margin:6px 0 2px;padding-left:20px"><li><b>Cek Referensi</b>: 1 kuota per referensi yang diperiksa.</li><li><b>Cocokkan Sitasi</b>: 1 kuota per referensi di daftar pustaka naskah.</li><li><b>Perbaiki Style</b>: 1 kuota per referensi yang diperbaiki. Setelah itu, mengganti style, bahasa, atau mengedit data gratis.</li></ul><p>Referensi yang gagal diperiksa karena gangguan layanan tidak dihitung.</p></details>
-  <details><summary>Apakah mengganti style memakai kuota lagi?</summary><p>Tidak. Setelah daftar pustaka diperbaiki (1 kuota per referensi), Anda bebas mengganti style ke APA 7th, IEEE, Harvard, Chicago, MLA, atau Vancouver, mengganti bahasa istilah, dan mengedit data tanpa kuota tambahan, selama halaman belum ditutup.</p></details>
-  <details><summary>Bisakah kode dipakai di laptop dan HP?</summary><p>Bisa. Kode tidak terikat perangkat; masukkan saja kodenya di perangkat lain. Kuota yang dipakai tetap dihitung dari satu kode yang sama.</p></details>
-  <details><summary>Kode belum masuk ke email?</summary><p>Tunggu beberapa menit dan periksa folder Spam atau Promosi. Bila masih belum ada, hubungi kami lewat WhatsApp <a href="https://wa.me/6282342747379" target="_blank" rel="noopener">+62 823-4274-7379</a> atau email <a href="mailto:admin@rujuk.id">admin@rujuk.id</a> dengan menyertakan bukti pembayaran dari Lynk.</p></details>
-  <details><summary>Apakah naskah saya disimpan?</summary><p>Tidak. Naskah pada fitur Cocokkan Sitasi dikirim ke server hanya untuk dicocokkan saat itu juga, lalu langsung dibuang, tidak disimpan. File .docx dibaca di browser Anda. Pada Cek Referensi dan Perbaiki Style, hanya daftar pustaka yang dikirim untuk dicocokkan dengan basis data publik, lalu disimpan sementara di memori server paling lama 24 jam untuk mempercepat pemeriksaan ulang.</p></details>
-  <details><summary>Apakah "Tidak ditemukan" berarti referensinya palsu?</summary><p>Belum tentu. Sebagian buku lokal, prosiding, dan jurnal nasional belum tercatat di basis data yang diperiksa. Hasil Rujuk adalah alat bantu; keputusan akhir tetap di tangan penulis dan pembimbing.</p></details>
+  <h2 class="sec" data-i18n="price.faqH">Pertanyaan umum</h2>
+  <details><summary data-i18n="faq.q1">Kapan masa berlaku dihitung?</summary><p data-i18n="faq.a1">Sejak kode pertama kali dipakai untuk memeriksa referensi, bukan sejak dibeli. Jadi aman membeli lebih awal.</p></details>
+  <details><summary data-i18n="faq.q2">Bagaimana kuota dihitung?</summary><p data-i18n="faq.a2">Satu kuota dipakai bersama untuk semua fitur, dengan hitungan 1 referensi = 1 kuota:</p><ul style="color:var(--muted);margin:6px 0 2px;padding-left:20px"><li data-i18n="faq.a2l1"><b>Cek Referensi</b>: 1 kuota per referensi yang diperiksa.</li><li data-i18n="faq.a2l2"><b>Cocokkan Sitasi</b>: 1 kuota per referensi di daftar pustaka naskah.</li><li data-i18n="faq.a2l3"><b>Perbaiki Style</b>: 1 kuota per referensi yang diperbaiki. Setelah itu, mengganti style, bahasa, atau mengedit data gratis.</li></ul><p data-i18n="faq.a2b">Referensi yang gagal diperiksa karena gangguan layanan tidak dihitung.</p></details>
+  <details><summary data-i18n="faq.q3">Apakah mengganti style memakai kuota lagi?</summary><p data-i18n="faq.a3">Tidak. Setelah daftar pustaka diperbaiki (1 kuota per referensi), Anda bebas mengganti style ke APA 7th, IEEE, Harvard, Chicago, MLA, atau Vancouver, mengganti bahasa istilah, dan mengedit data tanpa kuota tambahan, selama halaman belum ditutup.</p></details>
+  <details><summary data-i18n="faq.q4">Bisakah kode dipakai di laptop dan HP?</summary><p data-i18n="faq.a4">Bisa. Kode tidak terikat perangkat; masukkan saja kodenya di perangkat lain. Kuota yang dipakai tetap dihitung dari satu kode yang sama.</p></details>
+  <details><summary data-i18n="faq.q5">Kode belum masuk ke email?</summary><p data-i18n="faq.a5">Tunggu beberapa menit dan periksa folder Spam atau Promosi. Bila masih belum ada, hubungi kami lewat WhatsApp <a href="https://wa.me/6282342747379" target="_blank" rel="noopener">+62 823-4274-7379</a> atau email <a href="mailto:admin@rujuk.id">admin@rujuk.id</a> dengan menyertakan bukti pembayaran dari Lynk.</p></details>
+  <details><summary data-i18n="faq.q6">Apakah naskah saya disimpan?</summary><p data-i18n="faq.a6">Tidak. Naskah pada fitur Cocokkan Sitasi dikirim ke server hanya untuk dicocokkan saat itu juga, lalu langsung dibuang, tidak disimpan. File .docx dibaca di browser Anda. Pada Cek Referensi dan Perbaiki Style, hanya daftar pustaka yang dikirim untuk dicocokkan dengan basis data publik, lalu disimpan sementara di memori server paling lama 24 jam untuk mempercepat pemeriksaan ulang.</p></details>
+  <details><summary data-i18n="faq.q7">Apakah "Tidak ditemukan" berarti referensinya palsu?</summary><p data-i18n="faq.a7">Belum tentu. Sebagian buku lokal, prosiding, dan jurnal nasional belum tercatat di basis data yang diperiksa. Hasil Rujuk adalah alat bantu; keputusan akhir tetap di tangan penulis dan pembimbing.</p></details>
 
   <div class="contact" id="kontak">
-    <b>Butuh bantuan?</b>
+    <b data-i18n="contact.help">Butuh bantuan?</b>
     <a href="mailto:admin@rujuk.id">✉ admin@rujuk.id</a>
     <a href="https://wa.me/6282342747379" target="_blank" rel="noopener">WhatsApp +62 823-4274-7379</a>
   </div>
 
-  <footer>Pembayaran diproses oleh Lynk.id. Harga dalam Rupiah. <a href="/">Kembali ke aplikasi</a></footer>
+  <footer data-i18n="price.footer">Pembayaran diproses oleh Lynk.id. Harga dalam Rupiah. <a href="/">Kembali ke aplikasi</a></footer>
 </div>
+<script>RujukI18n.apply();</script>
 <script>
 (async () => {
   const $ = (id) => document.getElementById(id);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-  const rupiah = (n) => 'Rp' + Number(n).toLocaleString('id-ID');
+  const EN = RujukI18n.lang === 'en';
+  const rupiah = (n) => (EN ? 'IDR ' + Number(n).toLocaleString('en-US') : 'Rp' + Number(n).toLocaleString('id-ID'));
   let d;
-  try { d = await (await fetch('/api/plans')).json(); } catch { $('plans').replaceChildren(el('p', 'lead', 'Gagal memuat paket. Muat ulang halaman.')); return; }
+  try { d = await (await fetch('/api/plans')).json(); } catch { $('plans').replaceChildren(el('p', 'lead', T('Gagal memuat paket. Muat ulang halaman.'))); return; }
 
-  if (d.trial_per_day) $('trialtag').textContent = `Coba gratis ${d.trial_per_day} referensi per hari`;
+  if (d.trial_per_day) $('trialtag').textContent = T('Coba gratis {n} referensi per hari', { n: d.trial_per_day });
 
   const box = $('plans');
   box.replaceChildren();
   for (const p of d.paket) {
     const c = el('div', 'plan' + (p.unggulan ? ' featured' : ''));
-    if (p.unggulan) c.append(el('span', 'tag', 'Paling banyak dipilih'));
-    c.append(el('h2', null, p.nama), el('div', 'for', p.untuk || ''));
+    if (p.unggulan) c.append(el('span', 'tag', T('Paling banyak dipilih')));
+    c.append(el('h2', null, p.nama), el('div', 'for', T(p.untuk || '')));
     const price = el('div', 'price', rupiah(p.harga));
-    price.append(el('small', null, 'sekali bayar, tanpa langganan'));
+    price.append(el('small', null, T('sekali bayar, tanpa langganan')));
     c.append(price);
     const ul = el('ul');
-    (p.fitur && p.fitur.length ? p.fitur : [`${p.kuota} referensi`, `Berlaku ${p.hari} hari`]).forEach((f) => ul.append(el('li', null, f)));
+    (p.fitur && p.fitur.length ? p.fitur : [T('{n} referensi', { n: p.kuota }), T('Berlaku {n} hari', { n: p.hari })]).forEach((f) => ul.append(el('li', null, T(f))));
     c.append(ul);
-    const a = el('a', 'btn', p.link ? `Beli paket ${p.nama}` : 'Segera tersedia');
+    const a = el('a', 'btn', p.link ? T('Beli paket {name}', { name: p.nama }) : T('Segera tersedia'));
     if (p.link) { a.href = p.link; a.rel = 'noopener'; } else a.setAttribute('aria-disabled', 'true');
     c.append(a);
     box.append(c);
@@ -162,7 +172,7 @@
     let wa = String(d.kontak_wa).replace(/[^\d]/g, '');
     if (wa.startsWith('0')) wa = '62' + wa.slice(1);
     const b = $('instbtn');
-    b.href = `https://wa.me/${wa}?text=${encodeURIComponent('Halo, saya tertarik dengan lisensi institusi Rujuk.')}`;
+    b.href = `https://wa.me/${wa}?text=${encodeURIComponent(T('Halo, saya tertarik dengan lisensi institusi Rujuk.'))}`;
     b.target = '_blank'; b.rel = 'noopener';
     b.hidden = false;
   }

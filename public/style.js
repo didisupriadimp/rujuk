@@ -4,6 +4,7 @@
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);
+  const T = window.T || ((x, v) => (v ? String(x).replace(/\{(\w+)\}/g, (m, k) => (v[k] != null ? v[k] : m)) : x));
   const el = (tag, cls, text) => {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -21,15 +22,15 @@
   let busy = false;
 
   const TYPES = [
-    ['article-journal', 'Artikel jurnal'],
-    ['paper-conference', 'Makalah prosiding / konferensi'],
-    ['book', 'Buku'],
-    ['chapter', 'Bab dalam buku (book chapter)'],
-    ['thesis', 'Skripsi / Tesis / Disertasi'],
-    ['report', 'Laporan / dokumen resmi'],
-    ['webpage', 'Halaman web'],
+    ['article-journal', T('Artikel jurnal')],
+    ['paper-conference', T('Makalah prosiding / konferensi')],
+    ['book', T('Buku')],
+    ['chapter', T('Bab dalam buku (book chapter)')],
+    ['thesis', T('Skripsi / Tesis / Disertasi')],
+    ['report', T('Laporan / dokumen resmi')],
+    ['webpage', T('Halaman web')],
   ];
-  const typeName = (t) => (TYPES.find((x) => x[0] === t) || [t, 'Referensi'])[1];
+  const typeName = (t) => (TYPES.find((x) => x[0] === t) || [t, T('Referensi')])[1];
 
   // ---------------------------------------------------------------------------
   // Utilitas
@@ -52,8 +53,8 @@
   function setError(msg, withPriceLink) {
     errEl.replaceChildren(msg || '');
     if (withPriceLink) {
-      const a = el('a', null, 'Lihat paket dan harga');
-      a.href = '/harga';
+      const a = el('a', null, T('Lihat paket dan harga'));
+      a.href = window.RujukI18n ? RujukI18n.href('/harga') : '/harga';
       errEl.append(' ', a);
     }
   }
@@ -67,7 +68,7 @@
     styleSel.replaceChildren(...styles.map((s) => { const o = el('option', null, s.name); o.value = s.id; return o; }));
     styleSel.value = 'apa';
     sentence.checked = true;
-  }).catch(() => setError('Gagal memuat daftar style. Muat ulang halaman.'));
+  }).catch(() => setError(T('Gagal memuat daftar style. Muat ulang halaman.')));
 
   styleSel.addEventListener('change', () => {
     sentence.checked = !!currentStyle().sentenceCase;
@@ -81,13 +82,13 @@
   // ---------------------------------------------------------------------------
   function updateCount() {
     const n = CiteCheck.splitRefs(input.value).length;
-    $('st-count').textContent = n ? `${n} referensi terdeteksi · memakai ${n} kuota` : '';
+    $('st-count').textContent = n ? T('{n} referensi terdeteksi · memakai {n} kuota', { n }) : '';
   }
   input.addEventListener('input', updateCount);
 
   $('st-ambil').onclick = () => {
     const v = $('input').value.trim();
-    if (!v) { setError('Kotak daftar pustaka di tab Cek Referensi masih kosong.'); return; }
+    if (!v) { setError(T('Kotak daftar pustaka di tab Cek Referensi masih kosong.')); return; }
     setError('');
     input.value = v; updateCount();
   };
@@ -97,17 +98,17 @@
     ev.target.value = '';
     if (!f) return;
     setError('');
-    $('st-fileinfo').textContent = `Membaca ${f.name}…`;
+    $('st-fileinfo').textContent = T('Membaca {name}…', { name: f.name });
     try {
       const d = await DocxText.read(f);
       const { refs } = CiteCheck.splitManuscript(d.text);
       if (!refs) {
         $('st-fileinfo').textContent = '';
-        setError(`Judul "Daftar Pustaka" atau "References" tidak ditemukan di ${f.name}. Salin daftar pustakanya secara manual.`);
+        setError(T('Judul "Daftar Pustaka" atau "References" tidak ditemukan di {name}. Salin daftar pustakanya secara manual.', { name: f.name }));
         return;
       }
       input.value = refs; updateCount();
-      $('st-fileinfo').textContent = `Daftar pustaka diambil dari ${f.name}.`;
+      $('st-fileinfo').textContent = T('Daftar pustaka diambil dari {name}.', { name: f.name });
     } catch (e) {
       $('st-fileinfo').textContent = '';
       setError(e.message);
@@ -124,8 +125,8 @@
     if (busy) return;
     setError('');
     const refs = CiteCheck.splitRefs(input.value).map((r) => r.text);
-    if (!refs.length) { setError('Belum ada referensi yang bisa dibaca.'); return; }
-    if (refs.length > 500) { setError('Maksimal 500 referensi sekali proses.'); return; }
+    if (!refs.length) { setError(T('Belum ada referensi yang bisa dibaca.')); return; }
+    if (refs.length > 500) { setError(T('Maksimal 500 referensi sekali proses.')); return; }
     items = refs.map((text) => ({ text, csl: null, source: 'teks', verified: false, fixed: false, pending: true }));
     filter = 'all'; editing = null; order = [];
     busy = true;
@@ -137,17 +138,17 @@
       for (let k = 0; k < items.length;) {
         const size = RujukAccess.batchSize(8);
         const idx = items.map((_, i) => i).slice(k, k + size);
-        go.textContent = `Memproses… ${done}/${items.length}`;
+        go.textContent = T('Memproses… {done}/{total}', { done, total: items.length });
         const results = await checkRefs(idx.map((i) => items[i].text));
         results.forEach((r, j) => applyCheck(items[idx[j]], r));
         k += idx.length; done = k;
         barFill.style.width = Math.round((done / items.length) * 100) + '%';
       }
     } catch (e) {
-      setError(e.message + (done ? ` (${done} dari ${items.length} referensi sudah diproses; sisanya belum.)` : ''), e.quota);
+      setError(e.message + (done ? T(' ({done} dari {total} referensi sudah diproses; sisanya belum.)', { done, total: items.length }) : ''), e.quota);
     } finally {
       busy = false;
-      go.disabled = false; go.textContent = 'Perbaiki';
+      go.disabled = false; go.textContent = T('Perbaiki');
       setTimeout(() => { bar.style.display = 'none'; }, 600);
     }
     items = items.filter((it) => !it.pending);
@@ -170,7 +171,7 @@
   async function reformat(scroll) {
     if (!items.length) return;
     const go = $('st-go');
-    go.disabled = true; go.textContent = 'Memproses…';
+    go.disabled = true; go.textContent = T('Memproses…');
     try {
       const res = await fetch('/api/format', {
         method: 'POST',
@@ -181,7 +182,7 @@
         }),
       });
       const d = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(d.error || 'Gagal memformat.');
+      if (!res.ok) throw new Error(d.error || T('Gagal memformat.'));
       d.items.forEach((x, i) => { items[i].csl = x.csl; items[i].issues = x.issues; });
       order = d.entries.map((e) => e.index);
       d.entries.forEach((e) => {
@@ -195,7 +196,7 @@
     } catch (e) {
       setError(e.message);
     } finally {
-      if (!busy) { go.disabled = false; go.textContent = 'Perbaiki'; }
+      if (!busy) { go.disabled = false; go.textContent = T('Perbaiki'); }
     }
   }
 
@@ -210,8 +211,8 @@
     });
     const d = await res.json().catch(() => ({}));
     if (d.access) RujukAccess.update(d.access);
-    if (res.status === 402) { const e = new Error(d.error || 'Kuota tidak cukup.'); e.quota = true; throw e; }
-    if (!res.ok) throw new Error(d.error || 'Server tidak merespons dengan benar.');
+    if (res.status === 402) { const e = new Error(d.error || T('Kuota tidak cukup.')); e.quota = true; throw e; }
+    if (!res.ok) throw new Error(d.error || T('Server tidak merespons dengan benar.'));
     return d.results;
   }
 
@@ -222,16 +223,16 @@
     it.csl = r.csl || r.csl_text || {};
     if (r.csl_verified && r.csl) {
       it.source = r.csl_source; it.verified = true;
-      it.note = `Data diambil dari ${r.csl_source}.`;
+      it.note = T('Data diambil dari {src}.', { src: r.csl_source });
     } else if (r.match && r.match.csl && r.status === 'periksa') {
       it.source = 'teks';
       it.similar = { csl: r.match.csl, source: r.match.source, title: r.match.title };
-      it.note = `Ada karya yang mirip di ${r.match.source}, tetapi belum pasti sama. Periksa, lalu pakai datanya bila memang benar.`;
+      it.note = T('Ada karya yang mirip di {src}, tetapi belum pasti sama. Periksa, lalu pakai datanya bila memang benar.', { src: r.match.source });
     } else {
       it.source = 'teks';
       it.note = r.status === 'galat'
-        ? 'Database sedang tidak dapat dihubungi; data dibaca dari teks Anda (kuota referensi ini dikembalikan).'
-        : `Tidak ada data yang cocok di database (${r.label}). Data dibaca dari teks Anda; lengkapi lewat tombol Edit bila perlu.`;
+        ? T('Database sedang tidak dapat dihubungi; data dibaca dari teks Anda (kuota referensi ini dikembalikan).')
+        : T('Tidak ada data yang cocok di database ({label}). Data dibaca dari teks Anda; lengkapi lewat tombol Edit bila perlu.', { label: r.label });
     }
   }
 
@@ -239,10 +240,10 @@
   // Tampilan
   // ---------------------------------------------------------------------------
   const CATS = [
-    { key: 'all', label: 'Semua', test: () => true },
-    { key: 'needs', label: 'Perlu ditinjau', test: (it) => it.issues && it.issues.length > 0 && !it.fixed && !it.good },
-    { key: 'fixed', label: 'Sudah diperbaiki', test: (it) => it.fixed },
-    { key: 'good', label: 'Dari awal sesuai', test: (it) => it.good },
+    { key: 'all', label: T('Semua'), test: () => true },
+    { key: 'needs', label: T('Perlu ditinjau'), test: (it) => it.issues && it.issues.length > 0 && !it.fixed && !it.good },
+    { key: 'fixed', label: T('Sudah diperbaiki'), test: (it) => it.fixed },
+    { key: 'good', label: T('Dari awal sesuai'), test: (it) => it.good },
   ];
 
   function render() {
@@ -263,7 +264,7 @@
     box.replaceChildren();
     const cat = CATS.find((c) => c.key === filter);
     const list = items.map((it, i) => [it, i]).filter(([it]) => cat.test(it));
-    if (!list.length) box.append(el('div', 'empty', 'Tidak ada referensi pada kategori ini.'));
+    if (!list.length) box.append(el('div', 'empty', T('Tidak ada referensi pada kategori ini.')));
     for (const [it, i] of list) box.append(card(it, i, st));
 
     // Daftar lengkap
@@ -276,12 +277,12 @@
     const c = el('div', 'st-card' + (it.fixed ? ' fixed' : ''));
     const head = el('div', 'st-card-head');
     const left = el('div');
-    left.append(el('b', null, `Referensi #${i + 1}`), ' ', el('span', 'chip', typeName(it.csl && it.csl.type)));
+    left.append(el('b', null, T('Referensi #{n}', { n: i + 1 })), ' ', el('span', 'chip', typeName(it.csl && it.csl.type)));
     let badge;
-    if (it.fixed) badge = el('span', 'chip ok', 'Sudah diperbaiki');
-    else if (it.good) badge = el('span', 'chip ok', 'Dari awal sesuai');
-    else if (it.issues && it.issues.length) badge = el('span', 'chip warn', 'Perlu ditinjau');
-    else badge = el('span', 'chip', 'Diformat ulang');
+    if (it.fixed) badge = el('span', 'chip ok', T('Sudah diperbaiki'));
+    else if (it.good) badge = el('span', 'chip ok', T('Dari awal sesuai'));
+    else if (it.issues && it.issues.length) badge = el('span', 'chip warn', T('Perlu ditinjau'));
+    else badge = el('span', 'chip', T('Diformat ulang'));
     head.append(left, badge);
     c.append(head);
 
@@ -290,14 +291,14 @@
     // Kolom asli
     const orig = el('div', 'st-pane');
     const oh = el('div', 'st-pane-head');
-    oh.append(el('span', null, 'Asli'));
+    oh.append(el('span', null, T('Asli')));
     const links = el('span', 'st-meta');
     const q = (it.csl && it.csl.title) || it.text;
     const gs = el('a', null, 'Google Scholar');
     gs.href = 'https://scholar.google.com/scholar?q=' + encodeURIComponent(q.slice(0, 250)); gs.target = '_blank'; gs.rel = 'noopener';
     links.append(gs);
     if (it.csl && it.csl.DOI) {
-      const d = el('a', null, 'Buka DOI');
+      const d = el('a', null, T('Buka DOI'));
       d.href = 'https://doi.org/' + it.csl.DOI; d.target = '_blank'; d.rel = 'noopener';
       links.append(' · ', d);
     }
@@ -307,10 +308,10 @@
     // Kolom hasil
     const fixed = el('div', 'st-pane');
     const fh = el('div', 'st-pane-head');
-    fh.append(el('span', null, `Hasil — ${st.name}`));
+    fh.append(el('span', null, T('Hasil — {style}', { style: st.name })));
     const src = it.source === 'teks'
-      ? el('span', 'chip warn', 'Dari teks Anda')
-      : it.source === 'edit' ? el('span', 'chip', 'Diedit manual') : el('span', 'chip ok', `Terdata: ${it.source}`);
+      ? el('span', 'chip warn', T('Dari teks Anda'))
+      : it.source === 'edit' ? el('span', 'chip', T('Diedit manual')) : el('span', 'chip ok', T('Terdata: {src}', { src: it.source }));
     fh.append(src);
     const out = el('div', 'st-text');
     out.innerHTML = it.html || '';
@@ -329,16 +330,16 @@
     const acts = el('div', 'st-acts');
     const btn = (label, fn, cls) => { const b = el('button', cls || null, label); b.type = 'button'; b.onclick = () => fn(b); return b; };
     if (it.similar) {
-      acts.append(btn(`Pakai data ${it.similar.source}`, () => {
+      acts.append(btn(T('Pakai data {src}', { src: it.similar.source }), () => {
         it.csl = it.similar.csl; it.source = it.similar.source; it.verified = true; it.fixed = true; it.similar = null;
-        it.note = `Data diambil dari ${it.source}.`;
+        it.note = T('Data diambil dari {src}.', { src: it.source });
         reformat();
       }));
     }
     acts.append(
-      btn(editing === i ? 'Tutup edit' : 'Edit', () => { editing = editing === i ? null : i; render(); }),
-      btn(it.fixed ? 'Batalkan tanda beres' : 'Tandai beres', () => { it.fixed = !it.fixed; it.good = false; render(); }),
-      btn('Salin', async (b) => { const ok = await copyRich(wordHtml([i]), it.plain); flash(b, ok ? 'Tersalin ✓' : 'Gagal'); }),
+      btn(editing === i ? T('Tutup edit') : T('Edit'), () => { editing = editing === i ? null : i; render(); }),
+      btn(it.fixed ? T('Batalkan tanda beres') : T('Tandai beres'), () => { it.fixed = !it.fixed; it.good = false; render(); }),
+      btn(T('Salin'), async (b) => { const ok = await copyRich(wordHtml([i]), it.plain); flash(b, ok ? T('Tersalin ✓') : T('Gagal')); }),
     );
     c.append(acts);
     if (editing === i) c.append(editForm(it, i));
@@ -381,21 +382,21 @@
       return inp;
     };
     const year = c.issued && c.issued['date-parts'] ? c.issued['date-parts'][0][0] : '';
-    const typeSel = field('Jenis karya', 'type', c.type || 'article-journal', { select: TYPES });
-    field('Penulis (satu per baris: Nama Belakang, Nama Depan — atau nama lembaga)', 'author', (c.author || []).map(nameLine).join('\n'), { wide: true, textarea: true });
-    field('Tahun', 'year', year, { placeholder: 'mis. 2024' });
-    field('Judul', 'title', c.title, { wide: true });
-    const container = field('Nama jurnal / prosiding / judul buku induk', 'container-title', c['container-title'], { wide: true });
-    field('Volume', 'volume', c.volume);
-    field('Nomor (issue)', 'issue', c.issue);
-    field('Halaman', 'page', c.page, { placeholder: 'mis. 15-29' });
-    field('Editor buku (satu per baris)', 'editor', (c.editor || []).map(nameLine).join('\n'), { wide: true, textarea: true });
-    field('Penerbit / institusi', 'publisher', c.publisher, { placeholder: 'mis. Alfabeta, Universitas ...' });
-    field('Kota terbit', 'publisher-place', c['publisher-place']);
-    field('Edisi', 'edition', c.edition, { placeholder: 'mis. 2 atau Edisi revisi' });
-    field('Jenis tesis', 'genre', c.genre, { placeholder: 'Skripsi / Tesis / Disertasi' });
+    const typeSel = field(T('Jenis karya'), 'type', c.type || 'article-journal', { select: TYPES });
+    field(T('Penulis (satu per baris: Nama Belakang, Nama Depan — atau nama lembaga)'), 'author', (c.author || []).map(nameLine).join('\n'), { wide: true, textarea: true });
+    field(T('Tahun'), 'year', year, { placeholder: T('mis. 2024') });
+    field(T('Judul'), 'title', c.title, { wide: true });
+    const container = field(T('Nama jurnal / prosiding / judul buku induk'), 'container-title', c['container-title'], { wide: true });
+    field(T('Volume'), 'volume', c.volume);
+    field(T('Nomor (issue)'), 'issue', c.issue);
+    field(T('Halaman'), 'page', c.page, { placeholder: T('mis. 15-29') });
+    field(T('Editor buku (satu per baris)'), 'editor', (c.editor || []).map(nameLine).join('\n'), { wide: true, textarea: true });
+    field(T('Penerbit / institusi'), 'publisher', c.publisher, { placeholder: T('mis. Alfabeta, Universitas ...') });
+    field(T('Kota terbit'), 'publisher-place', c['publisher-place']);
+    field(T('Edisi'), 'edition', c.edition, { placeholder: T('mis. 2 atau Edisi revisi') });
+    field(T('Jenis tesis'), 'genre', c.genre, { placeholder: T('Skripsi / Tesis / Disertasi') });
     field('DOI', 'DOI', c.DOI, { placeholder: '10.xxxx/...' });
-    field('URL (bila tidak ada DOI)', 'URL', c.URL, { wide: true });
+    field(T('URL (bila tidak ada DOI)'), 'URL', c.URL, { wide: true });
     box.append(grid);
 
     const toggle = () => {
@@ -413,13 +414,13 @@
           (k === 'genre' && t === 'thesis');
         inp.parentElement.style.display = show ? '' : 'none';
       });
-      container.parentElement.firstChild.textContent = t === 'chapter' ? 'Judul buku induk' : t === 'paper-conference' ? 'Nama prosiding / konferensi' : 'Nama jurnal';
+      container.parentElement.firstChild.textContent = t === 'chapter' ? T('Judul buku induk') : t === 'paper-conference' ? T('Nama prosiding / konferensi') : T('Nama jurnal');
     };
     typeSel.addEventListener('change', toggle);
     toggle();
 
     const acts = el('div', 'st-acts');
-    const save = el('button', 'primary small', 'Terapkan');
+    const save = el('button', 'primary small', T('Terapkan'));
     save.type = 'button';
     save.onclick = () => {
       const v = {};
@@ -432,11 +433,11 @@
       const ed = parseNames(v.editor); if (ed.length) csl.editor = ed;
       if (/^\d{4}$/.test(v.year || '')) csl.issued = { 'date-parts': [[Number(v.year)]] };
       for (const k of ['container-title', 'volume', 'issue', 'page', 'publisher', 'publisher-place', 'edition', 'genre', 'DOI', 'URL']) if (v[k]) csl[k] = v[k];
-      it.csl = csl; it.source = 'edit'; it.fixed = true; it.good = false; it.note = 'Diedit manual.';
+      it.csl = csl; it.source = 'edit'; it.fixed = true; it.good = false; it.note = T('Diedit manual.');
       editing = null;
       reformat();
     };
-    const cancel = el('button', 'small', 'Batal');
+    const cancel = el('button', 'small', T('Batal'));
     cancel.type = 'button';
     cancel.onclick = () => { editing = null; render(); };
     acts.append(save, cancel);
@@ -479,11 +480,11 @@
 
   $('st-copyword').onclick = async () => {
     const ok = await copyRich(wordHtml(order), order.map((i) => items[i].plain).join('\n'));
-    flash($('st-copyword'), ok ? 'Tersalin ✓ — tempel di Word' : 'Gagal menyalin');
+    flash($('st-copyword'), ok ? T('Tersalin ✓ — tempel di Word') : T('Gagal menyalin'));
   };
   $('st-copytext').onclick = async () => {
-    try { await navigator.clipboard.writeText(order.map((i) => items[i].plain).join('\n')); flash($('st-copytext'), 'Tersalin ✓'); }
-    catch { flash($('st-copytext'), 'Gagal menyalin'); }
+    try { await navigator.clipboard.writeText(order.map((i) => items[i].plain).join('\n')); flash($('st-copytext'), T('Tersalin ✓')); }
+    catch { flash($('st-copytext'), T('Gagal menyalin')); }
   };
 
   function rtfEscape(s) {
@@ -523,7 +524,7 @@
     const blob = new Blob([rtf], { type: 'application/rtf' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `daftar-pustaka-${currentStyle().id}.rtf`;
+    a.download = T('daftar-pustaka-{id}.rtf', { id: currentStyle().id });
     a.click();
     URL.revokeObjectURL(a.href);
   };

@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const querystring = require('querystring');
 const { checkOne } = require('./lib/check');
 const analytics = require('./lib/analytics');
+const i18n = require('./lib/i18n');
 const journals = require('./lib/journals');
 const access = require('./lib/access');
 const { parseLynk } = require('./lib/lynk');
@@ -68,6 +69,8 @@ const SECURITY_HEADERS = {
 };
 
 function send(res, status, body, type = 'application/json; charset=utf-8', extra = {}) {
+  // Halaman berbahasa Inggris meminta pesan dalam bahasa Inggris (header X-Lang: en)
+  if (res.__lang === 'en' && body && typeof body === 'object' && !Buffer.isBuffer(body)) body = i18n.translateResponse(body);
   const data = typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body);
   res.writeHead(status, { 'Content-Type': type, ...SECURITY_HEADERS, ...extra });
   res.end(data);
@@ -83,7 +86,9 @@ const MIME = {
   '.txt': 'text/plain; charset=utf-8',
 };
 
-const PAGES = { '/': '/index.html', '/harga': '/harga.html', '/admin': '/admin.html' };
+const PAGES = { '/': '/index.html', '/harga': '/harga.html', '/admin': '/admin.html', '/en': '/index.html', '/en/harga': '/harga.html' };
+const EN_PAGES = new Set(['/en', '/en/harga']);
+const pageCache = new Map(); // halaman /en yang sudah disusun
 
 // ---- Untuk mesin pencari (Google Search Console) ----
 const SITE_URL = (process.env.PUBLIC_URL || 'https://rujuk.id').replace(/\/$/, '');
@@ -99,10 +104,15 @@ Sitemap: ${SITE_URL}/sitemap.xml
 `;
 
 function sitemapXml() {
-  const pages = [['/', '1.0', 'weekly'], ['/harga', '0.8', 'monthly']];
+  // [alamat, pasangan bahasa Indonesia, pasangan bahasa Inggris, prioritas, frekuensi]
+  const pages = [
+    ['/', '/', '/en', '1.0', 'weekly'], ['/en', '/', '/en', '0.9', 'weekly'],
+    ['/harga', '/harga', '/en/harga', '0.8', 'monthly'], ['/en/harga', '/harga', '/en/harga', '0.7', 'monthly'],
+  ];
+  const alt = (id, en) => `<xhtml:link rel="alternate" hreflang="id" href="${SITE_URL}${id}"/><xhtml:link rel="alternate" hreflang="en" href="${SITE_URL}${en}"/><xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}${id}"/>`;
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${pages.map(([u, pr, cf]) => `  <url><loc>${SITE_URL}${u}</loc><lastmod>${STARTED}</lastmod><changefreq>${cf}</changefreq><priority>${pr}</priority></url>`).join('\n')}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${pages.map(([u, id, en, pr, cf]) => `  <url><loc>${SITE_URL}${u}</loc>${alt(id, en)}<lastmod>${STARTED}</lastmod><changefreq>${cf}</changefreq><priority>${pr}</priority></url>`).join('\n')}
 </urlset>
 `;
 }
@@ -125,6 +135,7 @@ function canonicalRedirect(req, res, p) {
 function serveStatic(req, res) {
   let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   const pagePath = PAGES[p] && p !== '/admin' ? p : null; // halaman publik yang dihitung di statistik
+  const english = EN_PAGES.has(p) ? p : null;
   p = PAGES[p] || p;
   const file = path.normalize(path.join(PUBLIC_DIR, p));
   if (!file.startsWith(PUBLIC_DIR + path.sep)) return send(res, 403, { error: 'Dilarang.' });
@@ -132,6 +143,10 @@ function serveStatic(req, res) {
     if (err) return send(res, 404, 'Halaman tidak ditemukan.', 'text/plain; charset=utf-8');
     const extra = p === '/admin.html' ? { 'X-Robots-Tag': 'noindex', 'Cache-Control': 'no-store' } : {};
     if (pagePath) analytics.pageView(req, pagePath, clientIp(req), SITE_HOST.replace(/^www\./, ''));
+    if (english) {
+      if (!pageCache.has(english)) pageCache.set(english, Buffer.from(i18n.englishPage(buf.toString('utf8'), english)));
+      buf = pageCache.get(english);
+    }
     send(res, 200, buf, MIME[path.extname(file)] || 'application/octet-stream', extra);
   });
 }
@@ -485,6 +500,11 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   const p = url.pathname;
   if (req.method === 'GET' && p === '/health') return send(res, 200, { ok: true });
+  if (p.startsWith('/api/') && !p.startsWith('/api/admin/') && req.headers['x-lang'] === 'en') res.__lang = 'en';
+  if ((req.method === 'GET' || req.method === 'HEAD') && (p === '/en/' || p === '/en/harga/')) {
+    res.writeHead(301, { Location: p.replace(/\/$/, '') + url.search });
+    return res.end();
+  }
   if (canonicalRedirect(req, res, p)) return;
   if ((req.method === 'GET' || req.method === 'HEAD') && p === '/robots.txt') return send(res, 200, ROBOTS_TXT, 'text/plain; charset=utf-8');
   if ((req.method === 'GET' || req.method === 'HEAD') && p === '/sitemap.xml') return send(res, 200, sitemapXml(), 'application/xml; charset=utf-8');

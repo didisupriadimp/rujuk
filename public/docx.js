@@ -2,6 +2,7 @@
    Mengambil teks naskah, catatan kaki, dan catatan akhir. */
 (function (root) {
   'use strict';
+  const _t = (m) => (typeof self !== 'undefined' && self.T ? self.T(m) : m);
 
   const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 
@@ -16,13 +17,13 @@
     for (let i = buf.byteLength - 22; i >= min; i--) {
       if (u32(v, i) === 0x06054b50) { eocd = i; break; }
     }
-    if (eocd < 0) throw new Error('Bukan file .docx yang valid.');
+    if (eocd < 0) throw new Error(_t('Bukan file .docx yang valid.'));
     const count = u16(v, eocd + 10);
     let p = u32(v, eocd + 16);
     const entries = {};
     const dec = new TextDecoder();
     for (let n = 0; n < count; n++) {
-      if (u32(v, p) !== 0x02014b50) throw new Error('Struktur file .docx rusak.');
+      if (u32(v, p) !== 0x02014b50) throw new Error(_t('Struktur file .docx rusak.'));
       const method = u16(v, p + 10);
       const compSize = u32(v, p + 20);
       const nameLen = u16(v, p + 28);
@@ -44,11 +45,11 @@
     if (e.method === 0) bytes = data;
     else if (e.method === 8) {
       if (typeof DecompressionStream === 'undefined') {
-        throw new Error('Browser ini belum mendukung pembacaan .docx. Gunakan versi terbaru Chrome, Edge, Firefox, atau Safari.');
+        throw new Error(_t('Browser ini belum mendukung pembacaan .docx. Gunakan versi terbaru Chrome, Edge, Firefox, atau Safari.'));
       }
       const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
       bytes = new Uint8Array(await new Response(stream).arrayBuffer());
-    } else throw new Error('Metode kompresi .docx tidak didukung.');
+    } else throw new Error(_t('Metode kompresi .docx tidak didukung.'));
     return new TextDecoder('utf-8').decode(bytes);
   }
 
@@ -92,7 +93,7 @@
 
   function parseXml(xml) {
     const doc = new DOMParser().parseFromString(xml, 'application/xml');
-    if (doc.getElementsByTagName('parsererror').length) throw new Error('Isi dokumen tidak dapat dibaca.');
+    if (doc.getElementsByTagName('parsererror').length) throw new Error(_t('Isi dokumen tidak dapat dibaca.'));
     return doc;
   }
 
@@ -112,12 +113,12 @@
   async function read(file) {
     if (!/\.docx$/i.test(file.name)) {
       throw new Error(/\.doc$/i.test(file.name)
-        ? 'Format .doc lama belum didukung. Buka di Word lalu simpan sebagai .docx.'
-        : 'Hanya file .docx yang didukung.');
+        ? _t('Format .doc lama belum didukung. Buka di Word lalu simpan sebagai .docx.')
+        : _t('Hanya file .docx yang didukung.'));
     }
     const buf = await file.arrayBuffer();
     const entries = listEntries(buf);
-    if (!entries['word/document.xml']) throw new Error('Isi dokumen Word tidak ditemukan di file ini.');
+    if (!entries['word/document.xml']) throw new Error(_t('Isi dokumen Word tidak ditemukan di file ini.'));
     const [docXml, fnXml, enXml] = await Promise.all([
       readEntry(buf, entries['word/document.xml']),
       entries['word/footnotes.xml'] ? readEntry(buf, entries['word/footnotes.xml']) : null,

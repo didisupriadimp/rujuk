@@ -15,6 +15,9 @@
   let message = '';
   let box = null;
 
+  const T = root.T || ((s, v) => (v ? String(s).replace(/\{(\w+)\}/g, (m, k) => (v[k] != null ? v[k] : m)) : s));
+  const L = () => (root.RujukI18n ? root.RujukI18n.locale : 'id-ID');
+  const priceHref = () => (root.RujukI18n ? root.RujukI18n.href('/harga') : '/harga');
   const el = (tag, cls, text) => {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -22,7 +25,7 @@
     return e;
   };
 
-  const fmtDate = (iso) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' });
+  const fmtDate = (iso) => new Date(iso).toLocaleDateString(L(), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' });
 
   async function post(url, body) {
     const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -39,7 +42,7 @@
 
   async function verify(input) {
     const r = await post('/api/code', { code: input });
-    if (!r.ok) throw new Error(r.data.error || 'Kode tidak dapat diperiksa.');
+    if (!r.ok) throw new Error(r.data.error || T('Kode tidak dapat diperiksa.'));
     return r.data.access;
   }
 
@@ -80,11 +83,11 @@
       inp.placeholder = 'RJK-XXXX-XXXX-XXXX';
       inp.autocomplete = 'off';
       inp.spellcheck = false;
-      inp.setAttribute('aria-label', 'Kode akses');
-      const ok = el('button', 'primary small', 'Pakai kode');
+      inp.setAttribute('aria-label', T('Kode akses'));
+      const ok = el('button', 'primary small', T('Pakai kode'));
       ok.type = 'submit';
-      form.append(inp, ok, action('Batal', () => { editing = false; message = ''; render(); }));
-      form.onsubmit = (ev) => { ev.preventDefault(); if (inp.value.trim()) { ok.disabled = true; ok.textContent = 'Memeriksa…'; useCode(inp.value.trim()); } };
+      form.append(inp, ok, action(T('Batal'), () => { editing = false; message = ''; render(); }));
+      form.onsubmit = (ev) => { ev.preventDefault(); if (inp.value.trim()) { ok.disabled = true; ok.textContent = T('Memeriksa…'); useCode(inp.value.trim()); } };
       box.append(form);
       if (message) box.append(el('div', 'access-msg', message));
       setTimeout(() => inp.focus(), 0);
@@ -99,22 +102,22 @@
       box.classList.add(bad ? 'warn' : 'ok');
       txt.append(el('span', 'access-code', info.code), ` · ${info.plan_name} · `);
       if (info.status === 'aktif') {
-        txt.append(el('b', null, `sisa ${info.remaining.toLocaleString('id-ID')}`), ` dari ${info.quota_total.toLocaleString('id-ID')} referensi · `);
-        txt.append(info.expires_at ? `berlaku sampai ${fmtDate(info.expires_at)}` : `berlaku ${info.days} hari sejak pertama dipakai`);
+        txt.append(el('b', null, T('sisa {n}', { n: info.remaining.toLocaleString(L()) })), T(' dari {total} referensi · ', { total: info.quota_total.toLocaleString(L()) }));
+        txt.append(info.expires_at ? T('berlaku sampai {date}', { date: fmtDate(info.expires_at) }) : T('berlaku {n} hari sejak pertama dipakai', { n: info.days }));
       } else {
-        const why = { habis: 'kuota sudah habis', kedaluwarsa: `masa berlaku berakhir ${info.expires_at ? fmtDate(info.expires_at) : ''}`, nonaktif: 'kode dinonaktifkan' }[info.status];
+        const why = { habis: T('kuota sudah habis'), kedaluwarsa: T('masa berlaku berakhir {date}', { date: info.expires_at ? fmtDate(info.expires_at) : '' }), nonaktif: T('kode dinonaktifkan') }[info.status];
         txt.append(el('b', null, why));
       }
       const acts = el('span', 'access-acts');
-      if (info.status !== 'aktif') { const a = el('a', 'linkbtn', 'Beli paket'); a.href = '/harga'; acts.append(a); }
-      acts.append(action('Ganti kode', () => { editing = true; render(); }), action('Keluar', clearCode));
+      if (info.status !== 'aktif') { const a = el('a', 'linkbtn', T('Beli paket')); a.href = priceHref(); acts.append(a); }
+      acts.append(action(T('Ganti kode'), () => { editing = true; render(); }), action(T('Keluar'), clearCode));
       line.append(acts);
     } else {
-      txt.append('Mode percobaan gratis');
-      if (trial) txt.append(' · kuota gratis hari ini: ', el('b', null, `${trial.remaining} dari ${trial.per_day}`), ' referensi (untuk semua fitur)');
+      txt.append(T('Mode percobaan gratis'));
+      if (trial) txt.append(T(' · kuota gratis hari ini: '), el('b', null, T('{r} dari {p}', { r: trial.remaining, p: trial.per_day })), T(' referensi (untuk semua fitur)'));
       const acts = el('span', 'access-acts');
-      acts.append(action('Masukkan kode akses', () => { editing = true; render(); }, 'strong'));
-      const a = el('a', 'linkbtn', 'Lihat paket'); a.href = '/harga';
+      acts.append(action(T('Masukkan kode akses'), () => { editing = true; render(); }, 'strong'));
+      const a = el('a', 'linkbtn', T('Lihat paket')); a.href = priceHref();
       acts.append(a);
       line.append(acts);
     }
@@ -154,7 +157,7 @@
       return;
     }
     if (code) {
-      try { info = await verify(code); } catch (e) { message = `Kode tersimpan (${code}) tidak valid lagi: ${e.message}`; code = ''; store.set(''); }
+      try { info = await verify(code); } catch (e) { message = T('Kode tersimpan ({code}) tidak valid lagi: {msg}', { code, msg: e.message }); code = ''; store.set(''); }
     }
     if (!code) await loadTrial();
     render();

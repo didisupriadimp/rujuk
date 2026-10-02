@@ -3,9 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--seo-->
 <title>Rujuk — Cek Daftar Pustaka, DOI, Sitasi & Style APA Online</title>
 <meta name="description" content="Cek daftar pustaka skripsi, tesis, disertasi, dan artikel jurnal: pastikan referensi benar-benar ada, DOI dan ISBN benar, sitasi di naskah cocok dengan daftar pustaka, lalu rapikan ke APA 7, IEEE, Harvard, Chicago, MLA, atau Vancouver.">
 <link rel="canonical" href="https://rujuk.id/">
+<link rel="alternate" hreflang="id" href="https://rujuk.id/">
+<link rel="alternate" hreflang="en" href="https://rujuk.id/en">
+<link rel="alternate" hreflang="x-default" href="https://rujuk.id/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Rujuk">
 <meta property="og:locale" content="id_ID">
@@ -19,6 +23,8 @@
 <meta name="twitter:title" content="Rujuk — Cek Daftar Pustaka, DOI, Sitasi & Style APA">
 <meta name="twitter:description" content="Cek referensi, cocokkan sitasi, dan rapikan daftar pustaka ke APA 7, IEEE, Harvard, dan lainnya.">
 <meta name="twitter:image" content="https://rujuk.id/img/og-image.png">
+<!--/seo-->
+<script src="/i18n.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -128,9 +134,11 @@
   .chip.off { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
   .jname { color: var(--ink); }
   .empty { color: var(--muted); text-align: center; padding: 24px; }
-  header nav { margin-left: auto; display: flex; gap: 16px; font-size: 15px; }
+  header nav { margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px 16px; font-size: 15px; }
   header nav a { color: var(--ink); text-decoration: none; font-weight: 600; }
   header nav a:hover { color: var(--brand); }
+  header nav a.langsw { border: 1px solid var(--line); border-radius: 999px; padding: 0 10px; font-weight: 600; font-size: 13px; line-height: 24px; color: var(--muted); }
+  header nav a.langsw:hover { color: var(--brand); border-color: var(--brand); }
   .access { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 0 0 18px; font-size: 14px; color: var(--muted); }
   .access.ok { border-color: color-mix(in srgb, var(--ok) 35%, var(--line)); }
   .access.warn { border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); background: var(--warn-bg); }
@@ -228,32 +236,32 @@
   <header>
     <img class="logo" src="/img/logo-mark.png" alt="" width="40" height="40">
     <div class="brandname"><h1>Rujuk</h1><small>Reference &amp; Citation Checker</small></div>
-    <nav><a href="/harga">Harga</a><a href="#kontak">Kontak</a></nav>
+    <nav><a href="/harga" data-i18n="nav.pricing">Harga</a><a href="#kontak" data-i18n="nav.contact">Kontak</a><a href="/en" class="langsw" data-lang-switch hreflang="en" lang="en">English</a></nav>
   </header>
-  <p class="tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, cocok dengan sitasi di naskah, dan sesuai style APA, IEEE, atau lainnya.</p>
+  <p class="tagline" data-i18n="home.tagline">Periksa daftar pustaka: apakah referensinya benar-benar ada, cocok dengan sitasi di naskah, dan sesuai style APA, IEEE, atau lainnya.</p>
 
   <div class="access" id="access" aria-live="polite"></div>
 
   <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tab-cek" aria-selected="true" aria-controls="pane-cek">Cek Referensi</button>
-    <button class="tab" role="tab" id="tab-sitasi" aria-selected="false" aria-controls="pane-sitasi">Cocokkan Sitasi</button>
-    <button class="tab" role="tab" id="tab-style" aria-selected="false" aria-controls="pane-style">Perbaiki Style</button>
+    <button class="tab" role="tab" id="tab-cek" aria-selected="true" aria-controls="pane-cek" data-i18n="tab.check">Cek Referensi</button>
+    <button class="tab" role="tab" id="tab-sitasi" aria-selected="false" aria-controls="pane-sitasi" data-i18n="tab.cite">Cocokkan Sitasi</button>
+    <button class="tab" role="tab" id="tab-style" aria-selected="false" aria-controls="pane-style" data-i18n="tab.style">Perbaiki Style</button>
   </nav>
 
   <div id="pane-cek" role="tabpanel" aria-labelledby="tab-cek">
   <section class="panel">
     <div class="labelrow">
-      <label class="lead" for="input">Tempel daftar pustaka</label>
-      <label class="upload">Ambil dari file .docx<input type="file" id="file1" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+      <label class="lead" for="input" data-i18n="check.paste">Tempel daftar pustaka</label>
+      <label class="upload"><span data-i18n="upload.fromDocx">Ambil dari file .docx</span><input type="file" id="file1" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
     </div>
-    <textarea id="input" spellcheck="false" placeholder="Contoh:
+    <textarea id="input" spellcheck="false" data-i18n-ph="ph.check" placeholder="Contoh:
 Sugiyono. (2019). Metode penelitian kuantitatif, kualitatif, dan R&amp;D. Alfabeta.
 Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; of goal pursuits: Human needs and the self-determination of behavior. Psychological Inquiry, 11(4), 227–268. https://doi.org/10.1207/S15327965PLI1104_01"></textarea>
-    <p class="hint">Satu referensi per baris (atau pisahkan dengan baris kosong). Mendukung gaya APA, IEEE, Harvard, dan penomoran [1] atau 1. Buku dicek lewat judul, penulis, dan ISBN.</p>
+    <p class="hint" data-i18n="check.hint">Satu referensi per baris (atau pisahkan dengan baris kosong). Mendukung gaya APA, IEEE, Harvard, dan penomoran [1] atau 1. Buku dicek lewat judul, penulis, dan ISBN.</p>
     <div class="fileinfo" id="fileinfo1"></div>
     <div class="row">
-      <button class="primary" id="go">Periksa</button>
-      <button id="clear">Kosongkan</button>
+      <button class="primary" id="go" data-i18n="btn.check">Periksa</button>
+      <button id="clear" data-i18n="btn.clear">Kosongkan</button>
       <span class="count" id="count"></span>
     </div>
     <div class="progress" id="progress"><div></div></div>
@@ -263,9 +271,9 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
   <section id="out" hidden>
     <div class="summary" id="summary"></div>
     <div class="toolbar">
-      <button id="tostyle">Perbaiki style daftar pustaka ini</button>
-      <button id="copy">Salin laporan</button>
-      <button id="csv">Unduh CSV</button>
+      <button id="tostyle" data-i18n="check.toStyle">Perbaiki style daftar pustaka ini</button>
+      <button id="copy" data-i18n="btn.copyReport">Salin laporan</button>
+      <button id="csv" data-i18n="btn.csv">Unduh CSV</button>
     </div>
     <ol class="results" id="results"></ol>
   </section>
@@ -276,26 +284,26 @@ Deci, E. L., &amp; Ryan, R. M. (2000). The &quot;what&quot; and &quot;why&quot; 
       <div class="grid2">
         <div>
           <div class="labelrow">
-            <label class="lead" for="naskah">Naskah</label>
-            <label class="upload">Unggah .docx<input type="file" id="file2" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+            <label class="lead" for="naskah" data-i18n="cite.manuscript">Naskah</label>
+            <label class="upload"><span data-i18n="upload.docx">Unggah .docx</span><input type="file" id="file2" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
           </div>
-          <textarea id="naskah" spellcheck="false" placeholder="Tempel isi naskah di sini.
+          <textarea id="naskah" spellcheck="false" data-i18n-ph="ph.manuscript" placeholder="Tempel isi naskah di sini.
 
 Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pustaka&quot; / &quot;References&quot; akan dipisahkan otomatis."></textarea>
         </div>
         <div>
           <div class="labelrow">
-            <label class="lead" for="pustaka">Daftar pustaka</label>
-            <button class="linkbtn" id="ambil">Ambil dari tab Cek Referensi</button>
+            <label class="lead" for="pustaka" data-i18n="cite.refList">Daftar pustaka</label>
+            <button class="linkbtn" id="ambil" data-i18n="cite.takeFromCheck">Ambil dari tab Cek Referensi</button>
           </div>
-          <textarea id="pustaka" spellcheck="false" placeholder="Kosongkan bila daftar pustaka sudah ikut ditempel di kotak naskah."></textarea>
+          <textarea id="pustaka" spellcheck="false" data-i18n-ph="ph.refs" placeholder="Kosongkan bila daftar pustaka sudah ikut ditempel di kotak naskah."></textarea>
         </div>
       </div>
       <div class="fileinfo" id="fileinfo2"></div>
-      <p class="hint">Mendukung sitasi penulis–tahun (APA, Harvard), baik dalam kurung (Sugiyono, 2019) maupun naratif Sugiyono (2019), termasuk et al./dkk., sitasi bernomor [1], [2–4], dan sitasi di catatan kaki (bila naskah diunggah sebagai .docx). Memakai 1 kuota per referensi di daftar pustaka. Naskah hanya diproses sesaat untuk pencocokan dan tidak disimpan.</p>
+      <p class="hint" data-i18n="cite.hint">Mendukung sitasi penulis–tahun (APA, Harvard), baik dalam kurung (Sugiyono, 2019) maupun naratif Sugiyono (2019), termasuk et al./dkk., sitasi bernomor [1], [2–4], dan sitasi di catatan kaki (bila naskah diunggah sebagai .docx). Memakai 1 kuota per referensi di daftar pustaka. Naskah hanya diproses sesaat untuk pencocokan dan tidak disimpan.</p>
       <div class="row">
-        <button class="primary" id="cocok">Cocokkan</button>
-        <button id="clear2">Kosongkan</button>
+        <button class="primary" id="cocok" data-i18n="btn.match">Cocokkan</button>
+        <button id="clear2" data-i18n="btn.clear">Kosongkan</button>
         <span class="count" id="count2"></span>
       </div>
       <div class="error" id="error2" role="alert"></div>
@@ -304,8 +312,8 @@ Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pust
     <section id="out2" hidden>
       <div class="summary" id="summary2"></div>
       <div class="toolbar">
-        <button id="kirim">Periksa referensi ini di tab Cek Referensi</button>
-        <button id="copy2">Salin laporan</button>
+        <button id="kirim" data-i18n="cite.sendToCheck">Periksa referensi ini di tab Cek Referensi</button>
+        <button id="copy2" data-i18n="btn.copyReport">Salin laporan</button>
       </div>
       <div id="res2"></div>
     </section>
@@ -314,33 +322,33 @@ Boleh sekaligus dengan daftar pustakanya: bagian setelah judul &quot;Daftar Pust
   <div id="pane-style" role="tabpanel" aria-labelledby="tab-style" hidden>
     <section class="panel">
       <div class="labelrow">
-        <label class="lead" for="st-input">Tempel daftar pustaka</label>
+        <label class="lead" for="st-input" data-i18n="check.paste">Tempel daftar pustaka</label>
         <span class="row" style="margin:0;gap:16px">
-          <label class="upload">Ambil dari file .docx<input type="file" id="st-file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
-          <button class="linkbtn" id="st-ambil">Ambil dari tab Cek Referensi</button>
+          <label class="upload"><span data-i18n="upload.fromDocx">Ambil dari file .docx</span><input type="file" id="st-file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+          <button class="linkbtn" id="st-ambil" data-i18n="cite.takeFromCheck">Ambil dari tab Cek Referensi</button>
         </span>
       </div>
-      <textarea id="st-input" spellcheck="false" placeholder="Tempel daftar pustaka yang ingin dirapikan, satu referensi per baris.
+      <textarea id="st-input" spellcheck="false" data-i18n-ph="ph.style" placeholder="Tempel daftar pustaka yang ingin dirapikan, satu referensi per baris.
 Contoh:
 Deci EL, Ryan RM. The what and why of goal pursuits. Psychological Inquiry. 2000;11(4):227-268. doi:10.1207/S15327965PLI1104_01
 Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakarya."></textarea>
       <div class="fileinfo" id="st-fileinfo"></div>
       <div class="st-controls">
-        <label>Style tujuan
+        <label><span data-i18n="style.target">Style tujuan</span>
           <select id="st-style"></select>
         </label>
-        <label>Bahasa istilah
+        <label><span data-i18n="style.termLang">Bahasa istilah</span>
           <select id="st-lang">
-            <option value="en">Inggris (et al., and, pp.)</option>
-            <option value="id">Indonesia (dkk., dan, hlm.)</option>
+            <option value="en" data-i18n="style.langEn">Inggris (et al., and, pp.)</option>
+            <option value="id" data-i18n="style.langId">Indonesia (dkk., dan, hlm.)</option>
           </select>
         </label>
-        <label class="check"><input type="checkbox" id="st-sentence"> Judul karya ditulis <i>sentence case</i></label>
+        <label class="check"><input type="checkbox" id="st-sentence"> <span data-i18n="style.sentence">Judul karya ditulis <i>sentence case</i></span></label>
       </div>
-      <p class="hint">Setiap referensi dicocokkan dengan database (Crossref, OpenAlex, PubMed, DOAJ, CORE, Google Books, Open Library, Library of Congress, Wikidata, serta halaman artikel dari link) agar nama penulis, volume, halaman, dan DOI lengkap, lalu diformat ke style pilihan. Memakai 1 kuota per referensi. Setelah itu, mengganti style, bahasa, atau mengedit data <b>gratis</b>.</p>
+      <p class="hint" data-i18n="style.hint">Setiap referensi dicocokkan dengan database (Crossref, OpenAlex, PubMed, DOAJ, CORE, Google Books, Open Library, Library of Congress, Wikidata, serta halaman artikel dari link) agar nama penulis, volume, halaman, dan DOI lengkap, lalu diformat ke style pilihan. Memakai 1 kuota per referensi. Setelah itu, mengganti style, bahasa, atau mengedit data <b>gratis</b>.</p>
       <div class="row">
-        <button class="primary" id="st-go">Perbaiki</button>
-        <button id="st-clear">Kosongkan</button>
+        <button class="primary" id="st-go" data-i18n="btn.fix">Perbaiki</button>
+        <button id="st-clear" data-i18n="btn.clear">Kosongkan</button>
         <span class="count" id="st-count"></span>
       </div>
       <div class="progress" id="st-progress"><div></div></div>
@@ -350,40 +358,41 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
     <section id="st-out" hidden>
       <div class="summary" id="st-summary"></div>
       <div class="toolbar">
-        <button id="st-copyword">Salin semua untuk Word</button>
-        <button id="st-copytext">Salin teks biasa</button>
-        <button id="st-rtf">Unduh .rtf</button>
+        <button id="st-copyword" data-i18n="style.copyWord">Salin semua untuk Word</button>
+        <button id="st-copytext" data-i18n="style.copyText">Salin teks biasa</button>
+        <button id="st-rtf" data-i18n="style.rtf">Unduh .rtf</button>
       </div>
       <div id="st-cards" class="st-cards"></div>
       <details class="st-final" id="st-final">
-        <summary>Lihat daftar pustaka lengkap (urutan sesuai <span id="st-final-style">style</span>)</summary>
+        <summary data-i18n="style.fullList">Lihat daftar pustaka lengkap (urutan sesuai <span id="st-final-style">style</span>)</summary>
         <div id="st-list" class="st-list"></div>
       </details>
     </section>
   </div>
 
   <section class="about" id="tentang">
-    <h2>Cek daftar pustaka skripsi, tesis, disertasi, dan artikel jurnal</h2>
-    <p>Rujuk membantu mahasiswa, dosen, dan penulis jurnal memastikan daftar pustaka rapi dan dapat dipertanggungjawabkan sebelum naskah diserahkan ke pembimbing, penguji, atau redaksi jurnal.</p>
+    <h2 data-i18n="about.h2">Cek daftar pustaka skripsi, tesis, disertasi, dan artikel jurnal</h2>
+    <p data-i18n="about.lead">Rujuk membantu mahasiswa, dosen, dan penulis jurnal memastikan daftar pustaka rapi dan dapat dipertanggungjawabkan sebelum naskah diserahkan ke pembimbing, penguji, atau redaksi jurnal.</p>
     <div class="about-grid">
-      <div><h3>Cek Referensi</h3><p>Memastikan setiap referensi benar-benar ada, DOI dan ISBN-nya benar, serta judul, tahun, dan penulisnya cocok. Dilengkapi label indeks Scopus (Q1–Q4) dan DOAJ untuk jurnal.</p></div>
-      <div><h3>Cocokkan Sitasi</h3><p>Menemukan penulis yang dikutip di naskah tetapi tidak ada di daftar pustaka, dan sebaliknya. Bisa langsung mengunggah file Word (.docx).</p></div>
-      <div><h3>Perbaiki Style</h3><p>Merapikan daftar pustaka ke APA 7, IEEE, Harvard, Chicago, MLA, atau Vancouver, lalu menyalinnya ke Word dengan format miring yang tetap terjaga.</p></div>
+      <div><h3 data-i18n="about.checkH">Cek Referensi</h3><p data-i18n="about.checkP">Memastikan setiap referensi benar-benar ada, DOI dan ISBN-nya benar, serta judul, tahun, dan penulisnya cocok. Dilengkapi label indeks Scopus (Q1–Q4) dan DOAJ untuk jurnal.</p></div>
+      <div><h3 data-i18n="about.citeH">Cocokkan Sitasi</h3><p data-i18n="about.citeP">Menemukan penulis yang dikutip di naskah tetapi tidak ada di daftar pustaka, dan sebaliknya. Bisa langsung mengunggah file Word (.docx).</p></div>
+      <div><h3 data-i18n="about.styleH">Perbaiki Style</h3><p data-i18n="about.styleP">Merapikan daftar pustaka ke APA 7, IEEE, Harvard, Chicago, MLA, atau Vancouver, lalu menyalinnya ke Word dengan format miring yang tetap terjaga.</p></div>
     </div>
-    <p class="note">Coba gratis 10 referensi per hari tanpa daftar. Untuk pemakaian lebih banyak, lihat <a href="/harga">paket harga</a>.</p>
+    <p class="note" data-i18n="about.note">Coba gratis 10 referensi per hari tanpa daftar. Untuk pemakaian lebih banyak, lihat <a href="/harga">paket harga</a>.</p>
   </section>
 
   <div class="contact" id="kontak">
-    <b>Butuh bantuan?</b>
+    <b data-i18n="contact.help">Butuh bantuan?</b>
     <a href="mailto:admin@rujuk.id">✉ admin@rujuk.id</a>
     <a href="https://wa.me/6282342747379" target="_blank" rel="noopener">WhatsApp +62 823-4274-7379</a>
   </div>
 
-  <footer>
+  <footer data-i18n="footer.home">
     Data dicocokkan dengan Crossref, OpenAlex, PubMed, DOAJ, CORE, Google Books, Open Library, Library of Congress, dan Wikidata. Referensi yang mencantumkan link artikel (misalnya jurnal OJS) juga dicek langsung ke halamannya.<span id="sjrinfo"></span> "Tidak ditemukan" tidak otomatis berarti fiktif: buku, prosiding, dan sebagian jurnal nasional belum tentu terindeks, jadi tetap periksa manual.
   </footer>
 </div>
 
+<script>RujukI18n.apply();</script>
 <script src="/citecheck.js"></script>
 <script src="/docx.js"></script>
 <script src="/access.js"></script>
@@ -400,16 +409,16 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
   fetch('/api/info').then((r) => r.json()).then((d) => {
     if (d.sjr && d.sjr.loaded) {
       info.sjr = d.sjr;
-      $('sjrinfo').textContent = ` Status indeks jurnal memakai data SCImago Journal Rank (SJR) ${d.sjr.year || ''}, yang berbasis data Scopus.`;
+      $('sjrinfo').textContent = T(' Status indeks jurnal memakai data SCImago Journal Rank (SJR) {year}, yang berbasis data Scopus.', { year: d.sjr.year || '' });
     }
   }).catch(() => {});
 
   const GROUPS = [
-    { key: 'valid', label: 'Ditemukan', match: (r) => r.status === 'valid' },
-    { key: 'periksa', label: 'Perlu dicek', match: (r) => r.status === 'periksa' },
-    { key: 'masalah', label: 'Bermasalah', match: (r) => ['doi_salah', 'doi_tidak_ada', 'isbn_salah', 'tidak_ditemukan'].includes(r.status) },
-    { key: 'scopus', label: 'Di jurnal Scopus', match: (r) => !!(r.journal && r.journal.scopus), optional: true },
-    { key: 'galat', label: 'Gagal diperiksa', match: (r) => r.status === 'galat', optional: true },
+    { key: 'valid', label: T('Ditemukan'), match: (r) => r.status === 'valid' },
+    { key: 'periksa', label: T('Perlu dicek'), match: (r) => r.status === 'periksa' },
+    { key: 'masalah', label: T('Bermasalah'), match: (r) => ['doi_salah', 'doi_tidak_ada', 'isbn_salah', 'tidak_ditemukan'].includes(r.status) },
+    { key: 'scopus', label: T('Di jurnal Scopus'), match: (r) => !!(r.journal && r.journal.scopus), optional: true },
+    { key: 'galat', label: T('Gagal diperiksa'), match: (r) => r.status === 'galat', optional: true },
   ];
 
   const NUM = /^(\[\d+\]|\d+[.)])\s+/;
@@ -419,7 +428,7 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
 
   function updateCount() {
     const n = splitRefs(input.value).length;
-    countEl.textContent = n ? `${n} referensi terdeteksi` + (n > MAX_REFS ? ` (maksimal ${MAX_REFS})` : '') : '';
+    countEl.textContent = n ? T('{n} referensi terdeteksi', { n }) + (n > MAX_REFS ? T(' (maksimal {max})', { max: MAX_REFS }) : '') : '';
   }
   input.addEventListener('input', updateCount);
 
@@ -429,18 +438,18 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
     if (!f) return;
     const infoEl = $('fileinfo1');
     errEl.textContent = '';
-    infoEl.textContent = `Membaca ${f.name}…`;
+    infoEl.textContent = T('Membaca {name}…', { name: f.name });
     try {
       const d = await DocxText.read(f);
       const { refs } = CiteCheck.splitManuscript(d.text);
       if (!refs) {
         infoEl.textContent = '';
-        errEl.textContent = `Judul "Daftar Pustaka" atau "References" tidak ditemukan di ${f.name}. Pastikan judul itu berada di baris tersendiri, atau salin daftar pustakanya secara manual.`;
+        errEl.textContent = T('Judul "Daftar Pustaka" atau "References" tidak ditemukan di {name}. Pastikan judul itu berada di baris tersendiri, atau salin daftar pustakanya secara manual.', { name: f.name });
         return;
       }
       input.value = refs;
       updateCount();
-      infoEl.textContent = `Daftar pustaka diambil dari ${f.name}.`;
+      infoEl.textContent = T('Daftar pustaka diambil dari {name}.', { name: f.name });
     } catch (e) {
       infoEl.textContent = '';
       errEl.textContent = e.message;
@@ -452,8 +461,8 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
   go.onclick = async () => {
     errEl.textContent = '';
     const refs = splitRefs(input.value).slice(0, MAX_REFS);
-    if (!refs.length) { errEl.textContent = 'Belum ada referensi yang bisa dibaca.'; return; }
-    go.disabled = true; go.textContent = 'Memeriksa…';
+    if (!refs.length) { errEl.textContent = T('Belum ada referensi yang bisa dibaca.'); return; }
+    go.disabled = true; go.textContent = T('Memeriksa…');
     results = []; filter = null;
     bar.style.display = 'block'; barFill.style.width = '0';
     $('out').hidden = false; render();
@@ -469,27 +478,27 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
         const data = await res.json().catch(() => ({}));
         if (data.access) RujukAccess.update(data.access);
         if (res.status === 402) {
-          const e = new Error(data.error || 'Kuota tidak cukup.');
+          const e = new Error(data.error || T('Kuota tidak cukup.'));
           e.quota = true;
           throw e;
         }
-        if (!res.ok) throw new Error(data.error || 'Server tidak merespons dengan benar.');
+        if (!res.ok) throw new Error(data.error || T('Server tidak merespons dengan benar.'));
         results.push(...data.results);
         i += chunk.length;
         barFill.style.width = Math.round((results.length / refs.length) * 100) + '%';
         render();
       }
     } catch (e) {
-      errEl.replaceChildren(e.message + (results.length ? ` (${results.length} dari ${refs.length} sudah diperiksa.)` : ''));
+      errEl.replaceChildren(e.message + (results.length ? T(' ({done} dari {total} sudah diperiksa.)', { done: results.length, total: refs.length }) : ''));
       if (e.quota) {
         const a = document.createElement('a');
-        a.href = '/harga';
-        a.textContent = 'Lihat paket dan harga';
+        a.href = RujukI18n.href('/harga');
+        a.textContent = T('Lihat paket dan harga');
         errEl.append(' ', a);
       }
     } finally {
       window.RujukLastCheck = { refs: refs.slice(0, results.length), results: results.slice() };
-      go.disabled = false; go.textContent = 'Periksa';
+      go.disabled = false; go.textContent = T('Periksa');
       setTimeout(() => { bar.style.display = 'none'; }, 600);
     }
   };
@@ -517,7 +526,7 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
     list.replaceChildren();
     const g = GROUPS.find((x) => x.key === filter);
     const shown = results.map((r, i) => [r, i]).filter(([r]) => !g || g.match(r));
-    if (!shown.length) { list.append(el('li', 'empty', results.length ? 'Tidak ada hasil pada kategori ini.' : 'Menunggu hasil…')); return; }
+    if (!shown.length) { list.append(el('li', 'empty', results.length ? T('Tidak ada hasil pada kategori ini.') : T('Menunggu hasil…'))); return; }
 
     for (const [r, i] of shown) {
       const li = el('li', 'card');
@@ -528,11 +537,11 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
       const d = el('div', 'detail');
       if (r.match) {
         const f = el('div', 'found');
-        f.append('Terdata: ');
+        f.append(T('Terdata: '));
         const t = r.match.url ? el('a', null, r.match.title) : el('span', null, r.match.title);
         if (r.match.url) { t.href = r.match.url; t.target = '_blank'; t.rel = 'noopener'; }
         f.append(t);
-        const meta = [r.match.authors && r.match.authors.slice(0, 3).join(', ') + (r.match.authors.length > 3 ? ' dkk.' : ''), r.match.year, r.match.venue, r.match.isbn && 'ISBN ' + r.match.isbn]
+        const meta = [r.match.authors && r.match.authors.slice(0, 3).join(', ') + (r.match.authors.length > 3 ? T(' dkk.') : ''), r.match.year, r.match.venue, r.match.isbn && 'ISBN ' + r.match.isbn]
           .filter(Boolean).join(' · ');
         if (meta) f.append(el('div', null, meta + ` (${r.match.source})`));
         d.append(f);
@@ -550,15 +559,15 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
 
   function journalLine(j) {
     const box = el('div', 'chips');
-    box.append(el('span', 'jname', j.name || 'Jurnal'));
+    box.append(el('span', 'jname', j.name || T('Jurnal')));
     if (j.scopus) {
       const txt = 'Scopus' + (j.scopus.quartile ? ' ' + j.scopus.quartile : '') + (j.scopus.dataYear ? ` · SJR ${j.scopus.dataYear}` : '');
-      const c = el(j.scopus.url ? 'a' : 'span', 'chip ' + (j.scopus.active ? 'scopus' : 'off'), j.scopus.active ? txt : txt + ' · tidak aktif');
-      if (j.scopus.url) { c.href = j.scopus.url; c.target = '_blank'; c.rel = 'noopener'; c.title = 'Lihat di SCImago'; }
+      const c = el(j.scopus.url ? 'a' : 'span', 'chip ' + (j.scopus.active ? 'scopus' : 'off'), j.scopus.active ? txt : txt + T(' · tidak aktif'));
+      if (j.scopus.url) { c.href = j.scopus.url; c.target = '_blank'; c.rel = 'noopener'; c.title = T('Lihat di SCImago'); }
       box.append(c);
       if (j.scopus.type && !/journal/i.test(j.scopus.type)) box.append(el('span', 'chip', j.scopus.type));
     } else if (info.sjr) {
-      box.append(el('span', 'chip', 'Tidak ditemukan di daftar SJR'));
+      box.append(el('span', 'chip', T('Tidak ditemukan di daftar SJR')));
     }
     if (j.doaj) box.append(el('span', 'chip doaj', 'DOAJ'));
     return box;
@@ -566,35 +575,35 @@ Moleong, L.J., 2017. Metodologi Penelitian Kualitatif. Bandung: Remaja Rosdakary
 
   function scopusText(j) {
     if (!j || !j.scopus) return '';
-    return 'Scopus' + (j.scopus.quartile ? ' ' + j.scopus.quartile : '') + (j.scopus.active ? '' : ' (tidak aktif)');
+    return 'Scopus' + (j.scopus.quartile ? ' ' + j.scopus.quartile : '') + (j.scopus.active ? '' : T(' (tidak aktif)'));
   }
 
   function reportText() {
     return results.map((r, i) => {
       const lines = [`${i + 1}. [${r.label}] ${r.input}`];
-      if (r.match) lines.push(`   Terdata: ${r.match.title}${r.match.year ? ' (' + r.match.year + ')' : ''}${r.match.doi ? ' — doi:' + r.match.doi : ''}`);
-      if (r.journal) lines.push(`   Jurnal: ${r.journal.name || '-'}${r.journal.scopus ? ' — ' + scopusText(r.journal) : ''}${r.journal.doaj ? ' — DOAJ' : ''}`);
+      if (r.match) lines.push(`   ${T('Terdata')}: ${r.match.title}${r.match.year ? ' (' + r.match.year + ')' : ''}${r.match.doi ? ' — doi:' + r.match.doi : ''}`);
+      if (r.journal) lines.push(`   ${T('Jurnal')}: ${r.journal.name || '-'}${r.journal.scopus ? ' — ' + scopusText(r.journal) : ''}${r.journal.doaj ? ' — DOAJ' : ''}`);
       (r.notes || []).forEach((n) => lines.push('   - ' + n));
       return lines.join('\n');
     }).join('\n\n');
   }
 
   $('copy').onclick = async () => {
-    try { await navigator.clipboard.writeText(reportText()); $('copy').textContent = 'Tersalin ✓'; }
-    catch { $('copy').textContent = 'Gagal menyalin'; }
-    setTimeout(() => { $('copy').textContent = 'Salin laporan'; }, 1800);
+    try { await navigator.clipboard.writeText(reportText()); $('copy').textContent = T('Tersalin ✓'); }
+    catch { $('copy').textContent = T('Gagal menyalin'); }
+    setTimeout(() => { $('copy').textContent = T('Salin laporan'); }, 1800);
   };
 
   $('csv').onclick = () => {
     const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-    const head = ['No', 'Referensi', 'Status', 'Judul terdata', 'Tahun terdata', 'DOI terdata', 'Sumber', 'Jurnal', 'Indeks Scopus', 'DOAJ', 'Catatan'];
+    const head = ['No', 'Referensi', 'Status', 'Judul terdata', 'Tahun terdata', 'DOI terdata', 'Sumber', 'Jurnal', 'Indeks Scopus', 'DOAJ', 'Catatan'].map((h) => T(h));
     const rows = results.map((r, i) => [i + 1, r.input, r.label, r.match && r.match.title, r.match && r.match.year,
       r.match && r.match.doi, r.match && r.match.source, r.journal && r.journal.name, scopusText(r.journal),
-      r.journal && r.journal.doaj ? 'Ya' : '', (r.notes || []).join(' | ')].map(esc).join(','));
+      r.journal && r.journal.doaj ? T('Ya') : '', (r.notes || []).join(' | ')].map(esc).join(','));
     const blob = new Blob(['﻿' + [head.map(esc).join(','), ...rows].join('\n')], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'hasil-rujuk.csv';
+    a.download = T('hasil-rujuk.csv');
     a.click();
     URL.revokeObjectURL(a.href);
   };
@@ -635,13 +644,13 @@ RujukAccess.init(document.getElementById('access'));
     if (!f) return;
     const infoEl = $('fileinfo2');
     err.textContent = '';
-    infoEl.textContent = `Membaca ${f.name}…`;
+    infoEl.textContent = T('Membaca {name}…', { name: f.name });
     try {
       const d = await DocxText.read(f);
       naskah.value = d.text;
       docNotes = d.notes;
       updateCount();
-      infoEl.textContent = `${f.name}: ±${d.words.toLocaleString('id-ID')} kata` + (d.notes.length ? `, ${d.notes.length} catatan kaki/akhir ikut diperiksa.` : '.');
+      infoEl.textContent = T('{name}: ±{words} kata', { name: f.name, words: d.words.toLocaleString(RujukI18n.locale) }) + (d.notes.length ? T(', {n} catatan kaki/akhir ikut diperiksa.', { n: d.notes.length }) : '.');
     } catch (e) {
       infoEl.textContent = '';
       err.textContent = e.message;
@@ -658,7 +667,7 @@ RujukAccess.init(document.getElementById('access'));
   function updateCount() {
     const { refsText, autoSplit } = sources();
     const n = CiteCheck.splitRefs(refsText).length;
-    $('count2').textContent = n ? `${n} referensi terdeteksi${autoSplit ? ' (dari naskah)' : ''} · memakai ${n} kuota` : '';
+    $('count2').textContent = n ? T('{n} referensi terdeteksi', { n }) + (autoSplit ? T(' (dari naskah)') : '') + T(' · memakai {n} kuota', { n }) : '';
   }
   naskah.addEventListener('input', () => {
     if (!naskah.value.trim()) { docNotes = []; $('fileinfo2').textContent = ''; }
@@ -668,7 +677,7 @@ RujukAccess.init(document.getElementById('access'));
 
   $('ambil').onclick = () => {
     const v = $('input').value.trim();
-    if (!v) { err.textContent = 'Kotak daftar pustaka di tab Cek Referensi masih kosong.'; return; }
+    if (!v) { err.textContent = T('Kotak daftar pustaka di tab Cek Referensi masih kosong.'); return; }
     err.textContent = '';
     pustaka.value = v; updateCount();
   };
@@ -681,13 +690,13 @@ RujukAccess.init(document.getElementById('access'));
   $('cocok').onclick = () => {
     err.textContent = '';
     const { body, refsText } = sources();
-    if (!body.trim()) { err.textContent = 'Naskah masih kosong.'; return; }
+    if (!body.trim()) { err.textContent = T('Naskah masih kosong.'); return; }
     if (!CiteCheck.splitRefs(refsText).length) {
-      err.textContent = 'Daftar pustaka tidak ditemukan. Tempel di kotak kanan, atau pastikan naskah memuat judul "Daftar Pustaka" atau "References" di baris tersendiri.';
+      err.textContent = T('Daftar pustaka tidak ditemukan. Tempel di kotak kanan, atau pastikan naskah memuat judul "Daftar Pustaka" atau "References" di baris tersendiri.');
       return;
     }
     const btn = $('cocok');
-    btn.disabled = true; btn.textContent = 'Mencocokkan…';
+    btn.disabled = true; btn.textContent = T('Mencocokkan…');
     fetch('/api/citecheck', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...RujukAccess.headers() },
@@ -696,16 +705,16 @@ RujukAccess.init(document.getElementById('access'));
       const d = await res.json().catch(() => ({}));
       if (d.access) RujukAccess.update(d.access);
       if (!res.ok) {
-        err.replaceChildren(d.error || 'Server tidak merespons dengan benar.');
-        if (res.status === 402) { const a = el('a', null, 'Lihat paket dan harga'); a.href = '/harga'; err.append(' ', a); }
+        err.replaceChildren(d.error || T('Server tidak merespons dengan benar.'));
+        if (res.status === 402) { const a = el('a', null, T('Lihat paket dan harga')); a.href = RujukI18n.href('/harga'); err.append(' ', a); }
         return;
       }
       last = d.result;
       last.refsText = refsText;
       last.charged = d.charged;
       render(last);
-    }).catch(() => { err.textContent = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.'; })
-      .finally(() => { btn.disabled = false; btn.textContent = 'Cocokkan'; });
+    }).catch(() => { err.textContent = T('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.'); })
+      .finally(() => { btn.disabled = false; btn.textContent = T('Cocokkan'); });
   };
 
   function stat(n, label) {
@@ -728,29 +737,29 @@ RujukAccess.init(document.getElementById('access'));
     $('out2').hidden = false;
     const sum = $('summary2');
     sum.replaceChildren(
-      stat(r.totalCites, r.mode === 'nomor' ? 'Sitasi bernomor di naskah' : (r.noteCites ? `Sitasi di naskah (${r.noteCites} di catatan kaki)` : 'Sitasi di naskah')),
-      stat(r.refCount, 'Referensi di daftar pustaka'),
-      stat(r.missing.length, 'Sitasi tanpa referensi'),
-      stat(r.uncited.length, 'Referensi tidak disitasi'),
+      stat(r.totalCites, r.mode === 'nomor' ? T('Sitasi bernomor di naskah') : (r.noteCites ? T('Sitasi di naskah ({n} di catatan kaki)', { n: r.noteCites }) : T('Sitasi di naskah'))),
+      stat(r.refCount, T('Referensi di daftar pustaka')),
+      stat(r.missing.length, T('Sitasi tanpa referensi')),
+      stat(r.uncited.length, T('Referensi tidak disitasi')),
     );
     const out = $('res2');
     out.replaceChildren();
 
     if (!r.totalCites) {
-      out.append(el('p', 'empty', 'Tidak ada sitasi yang terbaca di naskah. Pastikan formatnya seperti (Sugiyono, 2019), Sugiyono (2019), atau [1].'));
+      out.append(el('p', 'empty', T('Tidak ada sitasi yang terbaca di naskah. Pastikan formatnya seperti (Sugiyono, 2019), Sugiyono (2019), atau [1].')));
     }
 
     // 1. Sitasi tanpa referensi
-    out.append(section('Disitasi di naskah, tidak ada di daftar pustaka', r.missing.length, r.missing.length ? 'bad' : 'ok'));
-    if (!r.missing.length) out.append(el('p', 'note', 'Semua sitasi di naskah punya pasangan di daftar pustaka.'));
+    out.append(section(T('Disitasi di naskah, tidak ada di daftar pustaka'), r.missing.length, r.missing.length ? 'bad' : 'ok'));
+    if (!r.missing.length) out.append(el('p', 'note', T('Semua sitasi di naskah punya pasangan di daftar pustaka.')));
     else {
       const ol = el('ol', 'results');
       for (const m of r.missing) {
         const li = el('li', 'card');
         const top = el('div', 'card-top');
-        top.append(el('span', 'ref cite', m.label), el('span', 'badge ' + (m.yearMismatch ? 'b-periksa' : 'b-tidak_ditemukan'), m.yearMismatch ? 'Tahun berbeda' : 'Tidak ada'));
+        top.append(el('span', 'ref cite', m.label), el('span', 'badge ' + (m.yearMismatch ? 'b-periksa' : 'b-tidak_ditemukan'), m.yearMismatch ? T('Tahun berbeda') : T('Tidak ada')));
         li.append(top);
-        if (m.count > 1) li.append(el('div', 'note', `Muncul ${m.count} kali di naskah.`));
+        if (m.count > 1) li.append(el('div', 'note', T('Muncul {n} kali di naskah.', { n: m.count })));
         if (m.suggestion) li.append(el('div', 'hintline warn', m.suggestion));
         contexts(li, m.contexts);
         ol.append(li);
@@ -759,8 +768,8 @@ RujukAccess.init(document.getElementById('access'));
     }
 
     // 2. Referensi tidak disitasi
-    out.append(section('Ada di daftar pustaka, tidak disitasi di naskah', r.uncited.length, r.uncited.length ? 'bad' : 'ok'));
-    if (!r.uncited.length) out.append(el('p', 'note', 'Semua referensi di daftar pustaka disitasi di naskah.'));
+    out.append(section(T('Ada di daftar pustaka, tidak disitasi di naskah'), r.uncited.length, r.uncited.length ? 'bad' : 'ok'));
+    if (!r.uncited.length) out.append(el('p', 'note', T('Semua referensi di daftar pustaka disitasi di naskah.')));
     else {
       const ol = el('ol', 'results');
       for (const u of r.uncited) {
@@ -775,7 +784,7 @@ RujukAccess.init(document.getElementById('access'));
 
     // 3. Cocok, tetapi perlu diperhatikan
     if (r.warnings.length) {
-      out.append(section('Cocok, tetapi perlu diperhatikan', r.warnings.length, 'warn'));
+      out.append(section(T('Cocok, tetapi perlu diperhatikan'), r.warnings.length, 'warn'));
       const ol = el('ol', 'results');
       for (const w of r.warnings) {
         const li = el('li', 'card');
@@ -790,13 +799,13 @@ RujukAccess.init(document.getElementById('access'));
     // 4. Semua yang cocok
     if (r.matched.length) {
       const d = el('details', 'more');
-      d.append(el('summary', null, `Lihat ${r.matched.length} referensi yang cocok`));
+      d.append(el('summary', null, T('Lihat {n} referensi yang cocok', { n: r.matched.length })));
       const ol = el('ol', 'results');
       ol.style.marginTop = '10px';
       for (const m of r.matched) {
         const li = el('li', 'card');
         const top = el('div', 'card-top');
-        top.append(el('span', 'ref', m.text), el('span', 'badge b-valid', `${m.count}× disitasi`));
+        top.append(el('span', 'ref', m.text), el('span', 'badge b-valid', T('{n}× disitasi', { n: m.count })));
         li.append(top);
         ol.append(li);
       }
@@ -804,25 +813,25 @@ RujukAccess.init(document.getElementById('access'));
       out.append(d);
     }
     out.append(el('p', 'note', r.mode === 'nomor'
-      ? 'Mode sitasi bernomor: nomor di naskah dicocokkan dengan nomor urut daftar pustaka.'
-      : 'Pencocokan memakai nama belakang penulis pertama dan tahun. Periksa ulang hasil yang janggal, terutama untuk nama lembaga atau nama yang sangat umum.'));
+      ? T('Mode sitasi bernomor: nomor di naskah dicocokkan dengan nomor urut daftar pustaka.')
+      : T('Pencocokan memakai nama belakang penulis pertama dan tahun. Periksa ulang hasil yang janggal, terutama untuk nama lembaga atau nama yang sangat umum.')));
   }
 
   $('copy2').onclick = async () => {
     if (!last) return;
     const r = last;
-    const lines = [`Pencocokan sitasi — ${r.totalCites} sitasi, ${r.refCount} referensi`, ''];
-    lines.push(`A. Disitasi di naskah, tidak ada di daftar pustaka (${r.missing.length})`);
-    r.missing.forEach((m, i) => lines.push(`${i + 1}. ${m.label}${m.count > 1 ? ` — ${m.count} kali` : ''}${m.suggestion ? ` — ${m.suggestion}` : ''}`));
-    lines.push('', `B. Ada di daftar pustaka, tidak disitasi (${r.uncited.length})`);
+    const lines = [T('Pencocokan sitasi — {c} sitasi, {r} referensi', { c: r.totalCites, r: r.refCount }), ''];
+    lines.push(T('A. Disitasi di naskah, tidak ada di daftar pustaka ({n})', { n: r.missing.length }));
+    r.missing.forEach((m, i) => lines.push(`${i + 1}. ${m.label}${m.count > 1 ? T(' — {n} kali', { n: m.count }) : ''}${m.suggestion ? ` — ${m.suggestion}` : ''}`));
+    lines.push('', T('B. Ada di daftar pustaka, tidak disitasi ({n})', { n: r.uncited.length }));
     r.uncited.forEach((u, i) => lines.push(`${i + 1}. ${u.text}`));
     if (r.warnings.length) {
-      lines.push('', `C. Perlu diperhatikan (${r.warnings.length})`);
+      lines.push('', T('C. Perlu diperhatikan ({n})', { n: r.warnings.length }));
       r.warnings.forEach((w, i) => lines.push(`${i + 1}. ${w.label} — ${w.notes.join(' ')}`));
     }
-    try { await navigator.clipboard.writeText(lines.join('\n')); $('copy2').textContent = 'Tersalin ✓'; }
-    catch { $('copy2').textContent = 'Gagal menyalin'; }
-    setTimeout(() => { $('copy2').textContent = 'Salin laporan'; }, 1800);
+    try { await navigator.clipboard.writeText(lines.join('\n')); $('copy2').textContent = T('Tersalin ✓'); }
+    catch { $('copy2').textContent = T('Gagal menyalin'); }
+    setTimeout(() => { $('copy2').textContent = T('Salin laporan'); }, 1800);
   };
 
   $('kirim').onclick = () => {
