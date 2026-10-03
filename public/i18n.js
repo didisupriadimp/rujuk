@@ -295,6 +295,12 @@
     'Nama jurnal': 'Journal name',
     'Terapkan': 'Apply',
     'Diedit manual.': 'Edited manually.',
+    'Dilengkapi dari {src}: {fields}.': 'Completed from {src}: {fields}.',
+    'Perhatikan: {notes}': 'Note: {notes}',
+    'nama jurnal': 'journal name',
+    'volume': 'volume',
+    'nomor': 'issue',
+    'halaman': 'pages',
     'Tersalin ✓ — tempel di Word': 'Copied ✓ — paste into Word',
     'daftar-pustaka-{id}.rtf': 'references-{id}.rtf',
     // Bentuk tunggal (dipakai bila n = 1)

@@ -220,10 +220,19 @@
     it.pending = false;
     it.checkLabel = r.label;
     it.similar = null;
+    it.review = false;
     it.csl = r.csl || r.csl_text || {};
     if (r.csl_verified && r.csl) {
       it.source = r.csl_source; it.verified = true;
       it.note = T('Data diambil dari {src}.', { src: r.csl_source });
+      if (r.csl_enriched && r.csl_enriched.length) {
+        it.note += ' ' + T('Dilengkapi dari {src}: {fields}.', { src: r.csl_enriched_from, fields: r.csl_enriched.map((f) => T(f)).join(', ') });
+      }
+      // Sumber cocok tetapi ada perbedaan (mis. tahun): tampilkan catatannya agar ditinjau
+      if (r.csl_review && r.notes && r.notes.length) {
+        it.review = true;
+        it.note += ' ' + T('Perhatikan: {notes}', { notes: r.notes.join(' ') });
+      }
     } else if (r.match && r.match.csl && r.status === 'periksa') {
       it.source = 'teks';
       it.similar = { csl: r.match.csl, source: r.match.source, title: r.match.title };
@@ -241,7 +250,7 @@
   // ---------------------------------------------------------------------------
   const CATS = [
     { key: 'all', label: T('Semua'), test: () => true },
-    { key: 'needs', label: T('Perlu ditinjau'), test: (it) => it.issues && it.issues.length > 0 && !it.fixed && !it.good },
+    { key: 'needs', label: T('Perlu ditinjau'), test: (it) => ((it.issues && it.issues.length > 0) || it.review) && !it.fixed && !it.good },
     { key: 'fixed', label: T('Sudah diperbaiki'), test: (it) => it.fixed },
     { key: 'good', label: T('Dari awal sesuai'), test: (it) => it.good },
   ];
@@ -281,7 +290,7 @@
     let badge;
     if (it.fixed) badge = el('span', 'chip ok', T('Sudah diperbaiki'));
     else if (it.good) badge = el('span', 'chip ok', T('Dari awal sesuai'));
-    else if (it.issues && it.issues.length) badge = el('span', 'chip warn', T('Perlu ditinjau'));
+    else if ((it.issues && it.issues.length) || it.review) badge = el('span', 'chip warn', T('Perlu ditinjau'));
     else badge = el('span', 'chip', T('Diformat ulang'));
     head.append(left, badge);
     c.append(head);
@@ -433,7 +442,7 @@
       const ed = parseNames(v.editor); if (ed.length) csl.editor = ed;
       if (/^\d{4}$/.test(v.year || '')) csl.issued = { 'date-parts': [[Number(v.year)]] };
       for (const k of ['container-title', 'volume', 'issue', 'page', 'publisher', 'publisher-place', 'edition', 'genre', 'DOI', 'URL']) if (v[k]) csl[k] = v[k];
-      it.csl = csl; it.source = 'edit'; it.fixed = true; it.good = false; it.note = T('Diedit manual.');
+      it.csl = csl; it.source = 'edit'; it.review = false; it.fixed = true; it.good = false; it.note = T('Diedit manual.');
       editing = null;
       reformat();
     };
