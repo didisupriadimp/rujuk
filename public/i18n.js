@@ -273,7 +273,7 @@
     'Tandai beres': 'Mark as done',
     'Salin': 'Copy',
     'Jenis karya': 'Type of work',
-    'Penulis (satu per baris: Nama Belakang, Nama Depan — atau nama lembaga)': 'Authors (one per line: Surname, Given name — or an organisation name)',
+    'Penulis (satu per baris: Nama Belakang, Nama Depan — nama lembaga tulis di dalam { }, mis. {Badan Pusat Statistik})': 'Authors (one per line: Surname, Given name — put organisation names in { }, e.g. {World Health Organization})',
     'Tahun': 'Year',
     'mis. 2024': 'e.g. 2024',
     'Judul': 'Title',

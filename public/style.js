@@ -364,7 +364,7 @@
   // ---------------------------------------------------------------------------
   // Edit manual
   // ---------------------------------------------------------------------------
-  const nameLine = (a) => (a.literal ? a.literal : a.given ? `${a.family}, ${a.given}` : a.family || '');
+  const nameLine = (a) => (a.literal ? `{${a.literal}}` : a.given ? `${a.family}, ${a.given}` : a.family || '');
   function parseNames(text) {
     return String(text || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
       if (l.includes(',')) { const [family, ...g] = l.split(','); return { family: family.trim(), given: g.join(',').trim() || undefined }; }
@@ -392,7 +392,7 @@
     };
     const year = c.issued && c.issued['date-parts'] ? c.issued['date-parts'][0][0] : '';
     const typeSel = field(T('Jenis karya'), 'type', c.type || 'article-journal', { select: TYPES });
-    field(T('Penulis (satu per baris: Nama Belakang, Nama Depan — atau nama lembaga)'), 'author', (c.author || []).map(nameLine).join('\n'), { wide: true, textarea: true });
+    field(T('Penulis (satu per baris: Nama Belakang, Nama Depan — nama lembaga tulis di dalam { }, mis. {Badan Pusat Statistik})'), 'author', (c.author || []).map(nameLine).join('\n'), { wide: true, textarea: true });
     field(T('Tahun'), 'year', year, { placeholder: T('mis. 2024') });
     field(T('Judul'), 'title', c.title, { wide: true });
     const container = field(T('Nama jurnal / prosiding / judul buku induk'), 'container-title', c['container-title'], { wide: true });
